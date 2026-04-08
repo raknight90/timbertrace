@@ -3,6 +3,7 @@
 import React from 'react';
 import { EngravingDesign, WoodMaterial } from '@/types/engraving';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -116,11 +117,11 @@ const DesignToolbar = ({ design, isExisting, onUpdate, onSave, onExportPNG }: De
           <h3 className="font-semibold uppercase tracking-wider text-sm">Engraving Text</h3>
         </div>
         <div className="space-y-4">
-          <Input 
+          <Textarea 
             placeholder="Enter text to engrave..."
             value={design.text}
             onChange={(e) => onUpdate({ text: e.target.value })}
-            className="bg-black/20 border-amber-900/50 focus:ring-amber-500 text-lg py-6"
+            className="bg-black/20 border-amber-900/50 focus:ring-amber-500 text-lg min-h-[100px] resize-none"
           />
           
           <div className="grid grid-cols-2 gap-4">

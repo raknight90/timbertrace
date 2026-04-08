@@ -9,6 +9,8 @@ export interface Decoration {
   rotation: number;
   flipX?: boolean;
   flipY?: boolean;
+  locked?: boolean;
+  hidden?: boolean;
 }
 
 export type WoodMaterial = 'walnut' | 'oak' | 'cherry' | 'pine' | 'maple' | 'mahogany' | 'cedar' | 'ebony' | 'birch';
@@ -27,6 +29,8 @@ export interface EngravingDesign {
   decorations: Decoration[];
   textPosition: { x: number; y: number };
   textRotation: number;
+  textLocked?: boolean;
+  textHidden?: boolean;
   createdAt: number;
   thumbnail?: string; // Base64 preview image
 }

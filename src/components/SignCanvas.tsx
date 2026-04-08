@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { EngravingDesign, WoodMaterial, Decoration } from '@/types/engraving';
-import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter, RotateCw, FlipHorizontal, FlipVertical, Layers } from 'lucide-react';
+import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter, RotateCw, FlipHorizontal, FlipVertical, Layers, Lock } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 const WOOD_COLORS: Record<WoodMaterial, string> = {
@@ -64,6 +64,14 @@ const SignCanvas = ({
 
   const handleMouseDown = (e: React.MouseEvent, targetId: string | 'text') => {
     e.stopPropagation();
+    
+    // Check if locked
+    if (targetId === 'text' && design.textLocked) return;
+    if (targetId !== 'text') {
+      const dec = design.decorations.find(d => d.id === targetId);
+      if (dec?.locked) return;
+    }
+
     onSelect(targetId);
     setIsDragging(true);
   };
@@ -108,6 +116,13 @@ const SignCanvas = ({
       if (!selectedId) return;
       const isInputFocused = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '');
       if (isInputFocused) return;
+
+      // Check if locked
+      if (selectedId === 'text' && design.textLocked) return;
+      if (selectedId !== 'text') {
+        const dec = design.decorations.find(d => d.id === selectedId);
+        if (dec?.locked) return;
+      }
 
       const step = e.shiftKey ? 2 : 0.5;
       let dx = 0;
@@ -188,7 +203,6 @@ const SignCanvas = ({
       >
         {/* Wood Sign Container */}
         <div className={`absolute inset-0 overflow-hidden rounded-sm shadow-2xl border ${isPrintMode ? 'border-gray-200' : 'border-black/40'}`}>
-          {/* Base Wood Color / Print Mode White */}
           <div 
             className="absolute inset-0 transition-colors duration-300"
             style={{ backgroundColor: isPrintMode ? '#FFFFFF' : WOOD_COLORS[design.material] }}
@@ -196,22 +210,14 @@ const SignCanvas = ({
           
           {!isPrintMode && (
             <>
-              {/* Wood Grain Texture */}
               <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
-              
-              {/* Chaffed/Beveled Edge Effect */}
               <div className="absolute inset-0 pointer-events-none rounded-sm shadow-[inset_0_0_15px_rgba(0,0,0,0.7),inset_0_0_2px_rgba(0,0,0,0.9)]" />
-              
-              {/* Worn Edge Highlight (Sanded Look) */}
               <div className="absolute inset-0 pointer-events-none rounded-sm border border-white/10 mix-blend-screen opacity-20" />
-              
-              {/* Lighting/Depth Overlays */}
               <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/20 pointer-events-none" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,transparent_70%)] pointer-events-none" />
             </>
           )}
           
-          {/* Grid Overlay */}
           {showGrid && (
             <div 
               className={`absolute inset-0 pointer-events-none ${isPrintMode ? 'opacity-10' : 'opacity-20'}`}
@@ -225,7 +231,6 @@ const SignCanvas = ({
             />
           )}
           
-          {/* Center Lines */}
           {showGrid && (
             <>
               <div className={`absolute left-1/2 top-0 bottom-0 w-[1px] ${isPrintMode ? 'bg-black/20' : 'bg-amber-500/30'} pointer-events-none`} />
@@ -235,85 +240,94 @@ const SignCanvas = ({
         </div>
 
         {/* Main Text Layer */}
-        <div 
-          className={`absolute cursor-move transition-shadow ${selectedId === 'text' ? 'z-50' : 'z-10'}`}
-          style={{
-            left: `${design.textPosition.x}%`,
-            top: `${design.textPosition.y}%`,
-            transform: `translate(-50%, -50%) rotate(${design.textRotation}deg)`,
-          }}
-          onMouseDown={(e) => handleMouseDown(e, 'text')}
-          onClick={(e) => e.stopPropagation()}
-        >
+        {!design.textHidden && (
           <div 
-            className={`relative group/text p-4 rounded-lg border-2 transition-all ${selectedId === 'text' ? 'border-amber-500 bg-amber-500/10' : 'border-transparent hover:border-amber-500/30'}`}
+            className={`absolute transition-shadow ${selectedId === 'text' ? 'z-50' : 'z-10'} ${design.textLocked ? 'cursor-default' : 'cursor-move'}`}
+            style={{
+              left: `${design.textPosition.x}%`,
+              top: `${design.textPosition.y}%`,
+              transform: `translate(-50%, -50%) rotate(${design.textRotation}deg)`,
+            }}
+            onMouseDown={(e) => handleMouseDown(e, 'text')}
+            onClick={(e) => e.stopPropagation()}
           >
-            <h2 
-              style={{ 
-                ...engravingStyle,
-                fontFamily: design.fontFamily, 
-                fontSize: `${design.fontSize}px`,
-                letterSpacing: `${design.letterSpacing}px`,
-              }}
-              className="text-center leading-tight select-none font-bold tracking-tight whitespace-nowrap"
+            <div 
+              className={`relative group/text p-4 rounded-lg border-2 transition-all ${selectedId === 'text' ? 'border-amber-500 bg-amber-500/10' : 'border-transparent hover:border-amber-500/30'}`}
             >
-              {design.text || "Your Text Here"}
-            </h2>
+              {design.textLocked && (
+                <div className="absolute -top-2 -right-2 bg-amber-500 text-black p-1 rounded-full shadow-lg">
+                  <Lock size={10} />
+                </div>
+              )}
+              <h2 
+                style={{ 
+                  ...engravingStyle,
+                  fontFamily: design.fontFamily, 
+                  fontSize: `${design.fontSize}px`,
+                  letterSpacing: `${design.letterSpacing}px`,
+                  whiteSpace: 'pre-wrap'
+                }}
+                className="text-center leading-tight select-none font-bold tracking-tight"
+              >
+                {design.text || "Your Text Here"}
+              </h2>
 
-            {selectedId === 'text' && (
-              <div className={`absolute ${design.textPosition.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
-                <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
-                  <Maximize size={12} className="text-amber-200/60" />
-                  <div className="w-24">
-                    <Slider 
-                      value={[design.fontSize]} 
-                      min={10} 
-                      max={200} 
-                      step={1}
-                      onValueChange={([val]) => onUpdateDesign?.({ fontSize: val })}
-                    />
+              {selectedId === 'text' && !design.textLocked && (
+                <div className={`absolute ${design.textPosition.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
+                  <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
+                    <Maximize size={12} className="text-amber-200/60" />
+                    <div className="w-24">
+                      <Slider 
+                        value={[design.fontSize]} 
+                        min={10} 
+                        max={200} 
+                        step={1}
+                        onValueChange={([val]) => onUpdateDesign?.({ fontSize: val })}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
+                    <RotateCw size={12} className="text-amber-200/60" />
+                    <div className="w-24">
+                      <Slider 
+                        value={[design.textRotation]} 
+                        min={0} 
+                        max={360} 
+                        step={1}
+                        onValueChange={([val]) => onUpdateDesign?.({ textRotation: val })}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 px-1">
+                    <button 
+                      onClick={() => onUpdateDesign?.({ textPosition: { ...design.textPosition, x: 50 } })}
+                      className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
+                      title="Center Horizontally"
+                    >
+                      <AlignCenter size={14} />
+                    </button>
+                    <button 
+                      onClick={() => onUpdateDesign?.({ textPosition: { ...design.textPosition, y: 50 } })}
+                      className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
+                      title="Center Vertically"
+                    >
+                      <AlignVerticalJustifyCenter size={14} />
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
-                  <RotateCw size={12} className="text-amber-200/60" />
-                  <div className="w-24">
-                    <Slider 
-                      value={[design.textRotation]} 
-                      min={0} 
-                      max={360} 
-                      step={1}
-                      onValueChange={([val]) => onUpdateDesign?.({ textRotation: val })}
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 px-1">
-                  <button 
-                    onClick={() => onUpdateDesign?.({ textPosition: { ...design.textPosition, x: 50 } })}
-                    className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
-                    title="Center Horizontally"
-                  >
-                    <AlignCenter size={14} />
-                  </button>
-                  <button 
-                    onClick={() => onUpdateDesign?.({ textPosition: { ...design.textPosition, y: 50 } })}
-                    className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
-                    title="Center Vertically"
-                  >
-                    <AlignVerticalJustifyCenter size={14} />
-                  </button>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Decorations Layer */}
         {design.decorations.map((dec) => {
+          if (dec.hidden) return null;
           const isSelected = selectedId === dec.id;
           return (
             <div 
               key={dec.id}
-              className={`absolute cursor-move transition-shadow ${isSelected ? 'z-50' : 'z-10'}`}
+              className={`absolute transition-shadow ${isSelected ? 'z-50' : 'z-10'} ${dec.locked ? 'cursor-default' : 'cursor-move'}`}
               style={{
                 left: `${dec.position.x}%`,
                 top: `${dec.position.y}%`,
@@ -325,6 +339,11 @@ const SignCanvas = ({
               <div 
                 className={`relative group/dec p-4 rounded-lg border-2 transition-all ${isSelected ? 'border-amber-500 bg-amber-500/10' : 'border-transparent hover:border-amber-500/30'}`}
               >
+                {dec.locked && (
+                  <div className="absolute -top-2 -right-2 bg-amber-500 text-black p-1 rounded-full shadow-lg">
+                    <Lock size={10} />
+                  </div>
+                )}
                 {dec.type === 'image' ? (
                   <img 
                     src={dec.src} 
@@ -349,7 +368,7 @@ const SignCanvas = ({
                   </span>
                 )}
 
-                {isSelected && (
+                {isSelected && !dec.locked && (
                   <div className={`absolute ${dec.position.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
                     <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
                       <Maximize size={12} className="text-amber-200/60" />
