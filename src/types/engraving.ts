@@ -28,4 +28,5 @@ export interface EngravingDesign {
   textPosition: { x: number; y: number };
   textRotation: number;
   createdAt: number;
+  thumbnail?: string; // Base64 preview image
 }

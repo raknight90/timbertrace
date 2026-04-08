@@ -15,6 +15,8 @@ const WOOD_COLORS: Record<WoodMaterial, string> = {
 interface SignCanvasProps {
   design: EngravingDesign;
   id?: string;
+  showGrid?: boolean;
+  snapToGrid?: boolean;
   onUpdateDesign?: (updates: Partial<EngravingDesign>) => void;
   onUpdateDecoration?: (id: string, updates: Partial<Decoration>) => void;
   onRemoveDecoration?: (id: string) => void;
@@ -25,6 +27,8 @@ interface SignCanvasProps {
 const SignCanvas = ({ 
   design, 
   id, 
+  showGrid,
+  snapToGrid = true,
   onUpdateDesign, 
   onUpdateDecoration, 
   onRemoveDecoration,
@@ -58,8 +62,25 @@ const SignCanvas = ({
     if (!isDragging || !selectedId || !canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    let x = ((e.clientX - rect.left) / rect.width) * 100;
+    let y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // Snapping Logic
+    if (snapToGrid) {
+      // Snap to center lines (50%)
+      if (Math.abs(x - 50) < 2) x = 50;
+      if (Math.abs(y - 50) < 2) y = 50;
+
+      // Snap to 1-inch grid (if grid is visible or always)
+      const gridStepX = (1 / design.width) * 100;
+      const gridStepY = (1 / design.height) * 100;
+      
+      const snappedX = Math.round(x / gridStepX) * gridStepX;
+      const snappedY = Math.round(y / gridStepY) * gridStepY;
+
+      if (Math.abs(x - snappedX) < 1.5) x = snappedX;
+      if (Math.abs(y - snappedY) < 1.5) y = snappedY;
+    }
 
     const constrainedX = Math.max(0, Math.min(100, x));
     const constrainedY = Math.max(0, Math.min(100, y));
@@ -158,9 +179,31 @@ const SignCanvas = ({
             className="absolute inset-0"
             style={{ backgroundColor: WOOD_COLORS[design.material] }}
           />
-          <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay" />
+          <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
           <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none" />
+          
+          {/* Grid Overlay */}
+          {showGrid && (
+            <div 
+              className="absolute inset-0 pointer-events-none opacity-20"
+              style={{
+                backgroundImage: `
+                  linear-gradient(to right, rgba(255,255,255,0.2) 1px, transparent 1px),
+                  linear-gradient(to bottom, rgba(255,255,255,0.2) 1px, transparent 1px)
+                `,
+                backgroundSize: `${(1 / design.width) * 100}% ${(1 / design.height) * 100}%`
+              }}
+            />
+          )}
+          
+          {/* Center Lines */}
+          {showGrid && (
+            <>
+              <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-amber-500/30 pointer-events-none" />
+              <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-amber-500/30 pointer-events-none" />
+            </>
+          )}
         </div>
 
         {/* Main Text Layer */}

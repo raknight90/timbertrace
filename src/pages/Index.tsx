@@ -9,7 +9,7 @@ import DesignLibrary from '@/components/DesignLibrary';
 import { showSuccess, showError } from '@/utils/toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { Hammer, Plus, Undo2, Redo2 } from 'lucide-react';
+import { Hammer, Plus, Undo2, Redo2, Grid3X3 } from 'lucide-react';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +36,8 @@ const Index = () => {
   const [history, setHistory] = useState<EngravingDesign[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [library, setLibrary] = useState<EngravingDesign[]>([]);
+  const [showGrid, setShowGrid] = useState(false);
+  const [snapToGrid, setSnapToGrid] = useState(true);
 
   // Load library from local storage
   useEffect(() => {
@@ -59,7 +61,7 @@ const Index = () => {
   const addToHistory = useCallback((design: EngravingDesign) => {
     setHistory(prev => {
       const newHistory = prev.slice(0, historyIndex + 1);
-      return [...newHistory, JSON.parse(JSON.stringify(design))].slice(-50); // Keep last 50 steps
+      return [...newHistory, JSON.parse(JSON.stringify(design))].slice(-50);
     });
     setHistoryIndex(prev => prev + 1);
   }, [historyIndex]);
@@ -102,8 +104,6 @@ const Index = () => {
   const handleUpdateDesign = (updates: Partial<EngravingDesign>) => {
     const updated = { ...currentDesign, ...updates };
     setCurrentDesign(updated);
-    // Only add to history for significant changes (not every drag frame)
-    // For simplicity here, we'll add it, but in a real app we might debounce
     if (!updates.textPosition) {
       addToHistory(updated);
     }
@@ -201,14 +201,38 @@ const Index = () => {
     showSuccess("Decoration removed");
   };
 
-  const handleSaveToLibrary = () => {
-    const newDesign = {
-      ...currentDesign,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: Date.now()
-    };
-    setLibrary(prev => [newDesign, ...prev]);
-    showSuccess("Design saved to library!");
+  const handleSaveToLibrary = async () => {
+    const element = document.getElementById('sign-preview');
+    if (!element) return;
+
+    try {
+      // Generate thumbnail
+      const canvas = await html2canvas(element, {
+        scale: 0.5,
+        useCORS: true,
+        backgroundColor: null,
+      });
+      const thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+
+      const newDesign = {
+        ...currentDesign,
+        id: Math.random().toString(36).substr(2, 9),
+        createdAt: Date.now(),
+        thumbnail
+      };
+      setLibrary(prev => [newDesign, ...prev]);
+      showSuccess("Design saved to library!");
+    } catch (err) {
+      console.error("Thumbnail generation failed", err);
+      // Save anyway without thumbnail
+      const newDesign = {
+        ...currentDesign,
+        id: Math.random().toString(36).substr(2, 9),
+        createdAt: Date.now()
+      };
+      setLibrary(prev => [newDesign, ...prev]);
+      showSuccess("Design saved (without preview)");
+    }
   };
 
   const handleLoadDesign = (design: EngravingDesign) => {
@@ -291,6 +315,18 @@ const Index = () => {
                 <Redo2 size={16} />
               </Button>
             </div>
+
+            <div className="flex items-center gap-2 bg-black/40 p-1 rounded-lg border border-amber-900/20">
+              <Button 
+                variant={showGrid ? "secondary" : "ghost"} 
+                size="icon" 
+                onClick={() => setShowGrid(!showGrid)}
+                className={`h-8 w-8 ${showGrid ? 'bg-amber-500/20 text-amber-400' : 'text-amber-200'}`}
+                title="Toggle Grid"
+              >
+                <Grid3X3 size={16} />
+              </Button>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -339,13 +375,17 @@ const Index = () => {
             <div className="w-full">
               <div className="mb-6 flex items-center justify-between w-full max-w-[800px] mx-auto">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
-                <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">Drag elements to position</div>
+                <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">
+                  {showGrid ? "Grid Snapping Active" : "Drag elements to position"}
+                </div>
               </div>
               
               <div className="flex justify-center w-full">
                 <SignCanvas 
                   design={currentDesign} 
                   id="sign-preview" 
+                  showGrid={showGrid}
+                  snapToGrid={snapToGrid}
                   onUpdateDesign={handleUpdateDesign}
                   onUpdateDecoration={handleUpdateDecoration}
                   onRemoveDecoration={handleRemoveDecoration}
