@@ -25,14 +25,20 @@ const SignCanvas = ({ design, id, onUpdateDesign, onUpdateDecoration, onRemoveDe
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  // Calculate display dimensions based on physical inches
-  // We want to fit the sign within a max area while respecting its real-world proportions
-  const maxDisplayWidth = 800;
-  const maxDisplayHeight = 500;
-  
-  const scale = Math.min(maxDisplayWidth / design.width, maxDisplayHeight / design.height);
-  const displayWidth = design.width * scale;
-  const displayHeight = design.height * scale;
+  // Use a base "Pixels Per Inch" to make the sign grow/shrink physically
+  const ppi = 25; 
+  let displayWidth = design.width * ppi;
+  let displayHeight = design.height * ppi;
+
+  // Cap the preview size so it doesn't break the layout
+  const maxWidth = 800;
+  const maxHeight = 500;
+
+  if (displayWidth > maxWidth || displayHeight > maxHeight) {
+    const scale = Math.min(maxWidth / displayWidth, maxHeight / displayHeight);
+    displayWidth *= scale;
+    displayHeight *= scale;
+  }
 
   const handleMouseDown = (e: React.MouseEvent, targetId: string | 'text') => {
     e.stopPropagation();
@@ -71,7 +77,7 @@ const SignCanvas = ({ design, id, onUpdateDesign, onUpdateDecoration, onRemoveDe
 
   return (
     <div 
-      className="flex items-center justify-center w-full min-h-[400px] p-8"
+      className="flex items-center justify-center w-full min-h-[550px] p-8 bg-black/20 rounded-2xl border border-amber-900/10"
       onClick={() => setSelectedId(null)}
     >
       <div 
