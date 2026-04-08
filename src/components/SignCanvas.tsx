@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { EngravingDesign, WoodMaterial, Decoration } from '@/types/engraving';
-import { Trash2, Maximize, Copy } from 'lucide-react';
+import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 const WOOD_COLORS: Record<WoodMaterial, string> = {
@@ -73,12 +73,9 @@ const SignCanvas = ({
     setIsDragging(false);
   };
 
-  // Keyboard navigation for fine-tuning
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!selectedId) return;
-      
-      // Don't move elements if user is typing in an input
       const isInputFocused = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '');
       if (isInputFocused) return;
 
@@ -131,12 +128,12 @@ const SignCanvas = ({
   const engravingStyle = {
     color: design.fontColor,
     textShadow: `
-      0px -2px 1px rgba(0,0,0,0.9),
-      0px 1px 1px rgba(255,255,255,0.2),
-      0px 4px 8px rgba(0,0,0,0.4)
+      0px -1px 1px rgba(0,0,0,0.8),
+      0px 1px 1px rgba(255,255,255,0.15),
+      inset 0px 2px 4px rgba(0,0,0,0.5)
     `,
     mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal' as any,
-    filter: 'contrast(1.1) brightness(0.85) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))'
+    filter: 'contrast(1.1) brightness(0.9) drop-shadow(0px 1px 1px rgba(0,0,0,0.2))'
   };
 
   return (
@@ -154,7 +151,6 @@ const SignCanvas = ({
           height: `${displayHeight}px`,
         }}
       >
-        {/* Background Wood Layer (Clipped) */}
         <div className="absolute inset-0 overflow-hidden rounded-sm shadow-2xl border border-black/30">
           <div 
             className="absolute inset-0"
@@ -192,7 +188,7 @@ const SignCanvas = ({
 
             {selectedId === 'text' && (
               <div className={`absolute ${design.textPosition.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
-                <div className="flex items-center gap-2 px-2">
+                <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
                   <Maximize size={12} className="text-amber-200/60" />
                   <div className="w-32">
                     <Slider 
@@ -203,6 +199,22 @@ const SignCanvas = ({
                       onValueChange={([val]) => onUpdateDesign?.({ fontSize: val })}
                     />
                   </div>
+                </div>
+                <div className="flex items-center gap-1 px-1">
+                  <button 
+                    onClick={() => onUpdateDesign?.({ textPosition: { ...design.textPosition, x: 50 } })}
+                    className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
+                    title="Center Horizontally"
+                  >
+                    <AlignCenter size={14} />
+                  </button>
+                  <button 
+                    onClick={() => onUpdateDesign?.({ textPosition: { ...design.textPosition, y: 50 } })}
+                    className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
+                    title="Center Vertically"
+                  >
+                    <AlignVerticalJustifyCenter size={14} />
+                  </button>
                 </div>
               </div>
             )}
@@ -264,6 +276,22 @@ const SignCanvas = ({
                           onValueChange={([val]) => onUpdateDecoration?.(dec.id, { scale: val })}
                         />
                       </div>
+                    </div>
+                    <div className="flex items-center gap-1 px-1 border-r border-amber-900/30">
+                      <button 
+                        onClick={() => onUpdateDecoration?.(dec.id, { position: { ...dec.position, x: 50 } })}
+                        className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
+                        title="Center Horizontally"
+                      >
+                        <AlignCenter size={14} />
+                      </button>
+                      <button 
+                        onClick={() => onUpdateDecoration?.(dec.id, { position: { ...dec.position, y: 50 } })}
+                        className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
+                        title="Center Vertically"
+                      >
+                        <AlignVerticalJustifyCenter size={14} />
+                      </button>
                     </div>
                     <button 
                       onClick={() => onDuplicateDecoration?.(dec.id)}

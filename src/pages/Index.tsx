@@ -9,8 +9,9 @@ import DesignLibrary from '@/components/DesignLibrary';
 import { showSuccess, showError } from '@/utils/toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { Hammer } from 'lucide-react';
+import { Hammer, Plus } from 'lucide-react';
 import { MadeWithDyad } from '@/components/made-with-dyad';
+import { Button } from '@/components/ui/button';
 
 const DEFAULT_DESIGN: EngravingDesign = {
   id: '1',
@@ -50,6 +51,15 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem('wood-sign-library', JSON.stringify(library));
   }, [library]);
+
+  const handleNewDesign = () => {
+    setCurrentDesign({
+      ...DEFAULT_DESIGN,
+      id: Math.random().toString(36).substr(2, 9),
+      createdAt: Date.now()
+    });
+    showSuccess("Started a new design");
+  };
 
   const handleUpdateDesign = (updates: Partial<EngravingDesign>) => {
     setCurrentDesign(prev => ({ ...prev, ...updates }));
@@ -186,12 +196,19 @@ const Index = () => {
               <p className="text-[10px] uppercase tracking-[0.2em] text-amber-500/60 font-semibold">Engraving Template Studio</p>
             </div>
           </div>
+          <Button 
+            onClick={handleNewDesign}
+            variant="ghost"
+            className="text-amber-200 hover:bg-amber-900/40 hover:text-amber-100"
+          >
+            <Plus size={18} className="mr-2" />
+            New Design
+          </Button>
         </div>
       </header>
 
       <main className="container mx-auto px-6 py-10 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Sticky Sidebar Controls */}
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar">
             <DesignToolbar 
               design={currentDesign} 
@@ -211,7 +228,6 @@ const Index = () => {
             />
           </div>
 
-          {/* Sticky Canvas Editor */}
           <div className="lg:col-span-8 flex flex-col items-center justify-start pt-4 lg:sticky lg:top-24">
             <div className="w-full">
               <div className="mb-6 flex items-center justify-between w-full max-w-[800px] mx-auto">
