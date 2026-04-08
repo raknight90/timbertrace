@@ -22,7 +22,6 @@ interface SignCanvasProps {
   id?: string;
   showGrid?: boolean;
   snapToGrid?: boolean;
-  isPrintMode?: boolean;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   onUpdateDesign?: (updates: Partial<EngravingDesign>) => void;
@@ -39,7 +38,6 @@ const SignCanvas = ({
   id, 
   showGrid,
   snapToGrid = true,
-  isPrintMode = false,
   selectedId,
   onSelect,
   onUpdateDesign, 
@@ -164,12 +162,7 @@ const SignCanvas = ({
     }
   }, [isDragging]);
 
-  const getEngravingStyle = (color: string) => isPrintMode ? {
-    color: '#000000',
-    textShadow: 'none',
-    filter: 'none',
-    mixBlendMode: 'normal' as any
-  } : {
+  const getEngravingStyle = (color: string) => ({
     color: color,
     textShadow: `
       -1px -1px 1px rgba(0,0,0,0.6), 
@@ -178,7 +171,7 @@ const SignCanvas = ({
     `,
     mixBlendMode: color.startsWith('rgba') ? 'multiply' : 'normal' as any,
     filter: 'contrast(1.2) brightness(0.85) drop-shadow(0px 1px 0px rgba(255,255,255,0.05))'
-  };
+  });
 
   return (
     <div 
@@ -196,29 +189,27 @@ const SignCanvas = ({
         }}
       >
         {/* Wood Sign Container */}
-        <div className={`absolute inset-0 overflow-hidden rounded-sm shadow-2xl border ${isPrintMode ? 'border-gray-200' : 'border-black/40'}`}>
+        <div className="absolute inset-0 overflow-hidden rounded-sm shadow-2xl border border-black/40">
           <div 
-            className="absolute inset-0 transition-colors duration-300"
-            style={{ backgroundColor: isPrintMode ? '#FFFFFF' : WOOD_COLORS[design.material] }}
+            className="absolute inset-0 transition-colors duration-300 sign-base-layer"
+            style={{ backgroundColor: WOOD_COLORS[design.material] }}
           />
           
-          {!isPrintMode && (
-            <>
-              <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
-              <div className="absolute inset-0 pointer-events-none rounded-sm shadow-[inset_0_0_15px_rgba(0,0,0,0.7),inset_0_0_2px_rgba(0,0,0,0.9)]" />
-              <div className="absolute inset-0 pointer-events-none rounded-sm border border-white/10 mix-blend-screen opacity-20" />
-              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/20 pointer-events-none" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,transparent_70%)] pointer-events-none" />
-            </>
-          )}
+          <div className="wood-effect-layer">
+            <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
+            <div className="absolute inset-0 pointer-events-none rounded-sm shadow-[inset_0_0_15px_rgba(0,0,0,0.7),inset_0_0_2px_rgba(0,0,0,0.9)]" />
+            <div className="absolute inset-0 pointer-events-none rounded-sm border border-white/10 mix-blend-screen opacity-20" />
+            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/20 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,transparent_70%)] pointer-events-none" />
+          </div>
           
           {showGrid && (
             <div 
-              className={`absolute inset-0 pointer-events-none ${isPrintMode ? 'opacity-10' : 'opacity-20'}`}
+              className="absolute inset-0 pointer-events-none opacity-20 no-print"
               style={{
                 backgroundImage: `
-                  linear-gradient(to right, ${isPrintMode ? 'black' : 'white'} 1px, transparent 1px),
-                  linear-gradient(to bottom, ${isPrintMode ? 'black' : 'white'} 1px, transparent 1px)
+                  linear-gradient(to right, white 1px, transparent 1px),
+                  linear-gradient(to bottom, white 1px, transparent 1px)
                 `,
                 backgroundSize: `${(1 / design.width) * 100}% ${(1 / design.height) * 100}%`
               }}
@@ -227,8 +218,8 @@ const SignCanvas = ({
           
           {showGrid && (
             <>
-              <div className={`absolute left-1/2 top-0 bottom-0 w-[1px] ${isPrintMode ? 'bg-black/20' : 'bg-amber-500/30'} pointer-events-none`} />
-              <div className={`absolute top-1/2 left-0 right-0 h-[1px] ${isPrintMode ? 'bg-black/20' : 'bg-amber-500/30'} pointer-events-none`} />
+              <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-amber-500/30 pointer-events-none no-print" />
+              <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-amber-500/30 pointer-events-none no-print" />
             </>
           )}
         </div>
@@ -258,13 +249,13 @@ const SignCanvas = ({
                     fontSize: `${textEl.fontSize}px`,
                     letterSpacing: `${textEl.letterSpacing}px`,
                   }}
-                  className="text-center leading-tight select-none font-bold tracking-tight whitespace-nowrap"
+                  className="text-center leading-tight select-none font-bold tracking-tight whitespace-nowrap engraving-content"
                 >
                   {textEl.text || "Your Text Here"}
                 </h2>
 
                 {isSelected && (
-                  <div className={`absolute ${textEl.position.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
+                  <div className="absolute no-print -top-12 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto">
                     <div className="flex items-center gap-1 px-1 border-r border-amber-900/30">
                       <button 
                         onClick={() => onUpdateText?.(textEl.id, { position: { ...textEl.position, x: 50 } })}
@@ -317,17 +308,17 @@ const SignCanvas = ({
                   <img 
                     src={dec.src} 
                     alt={dec.name}
-                    className="select-none block pointer-events-none"
+                    className="select-none block pointer-events-none engraving-image"
                     style={{
                       width: `${100 * dec.scale}px`,
                       height: 'auto',
-                      filter: isPrintMode ? 'grayscale(1) contrast(200%) brightness(0)' : 'brightness(0.8) contrast(1.2) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))',
-                      mixBlendMode: isPrintMode ? 'normal' : 'multiply'
+                      filter: 'brightness(0.8) contrast(1.2) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))',
+                      mixBlendMode: 'multiply'
                     }}
                   />
                 ) : (
                   <span 
-                    className="text-5xl select-none block"
+                    className="text-5xl select-none block engraving-content"
                     style={{
                       ...getEngravingStyle(design.textElements[0]?.fontColor || '#1a1a1a'),
                       transform: `scale(${dec.scale})`,
@@ -338,7 +329,7 @@ const SignCanvas = ({
                 )}
 
                 {isSelected && (
-                  <div className={`absolute ${dec.position.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
+                  <div className="absolute no-print -top-12 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto">
                     <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
                       <Maximize size={12} className="text-amber-200/60" />
                       <div className="w-20">
@@ -409,11 +400,9 @@ const SignCanvas = ({
           );
         })}
 
-        {!isPrintMode && (
-          <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md px-4 py-1.5 rounded-full text-[11px] text-amber-100 font-mono border border-amber-900/50 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-            {design.width}" x {design.height}" • {design.material.toUpperCase()}
-          </div>
-        )}
+        <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md px-4 py-1.5 rounded-full text-[11px] text-amber-100 font-mono border border-amber-900/50 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none no-print">
+          {design.width}" x {design.height}" • {design.material.toUpperCase()}
+        </div>
       </div>
     </div>
   );

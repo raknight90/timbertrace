@@ -132,11 +132,33 @@
     border: 1px solid #eee !important;
   }
 
-  /* Hide the background wrapper of the canvas */
   #sign-preview-wrapper {
     background: none !important;
     border: none !important;
     padding: 0 !important;
     min-height: 0 !important;
+  }
+
+  /* Force white background on the sign itself */
+  .sign-base-layer {
+    background-color: white !important;
+  }
+
+  /* Hide wood textures and effects */
+  .wood-effect-layer {
+    display: none !important;
+  }
+
+  /* Force black text and icons */
+  .engraving-content {
+    color: black !important;
+    text-shadow: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  .engraving-image {
+    filter: grayscale(1) contrast(200%) brightness(0) !important;
+    mix-blend-mode: normal !important;
   }
 }
