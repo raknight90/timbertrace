@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Palette, Save, Download, Trees, Paintbrush } from 'lucide-react';
+import { Type, Maximize2, Palette, Save, Download, Trees, Paintbrush, Check } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -17,11 +17,27 @@ const FONTS = [
   { name: 'Elegant Cursive', value: "'Great Vibes', cursive" },
 ];
 
-const MATERIALS: { name: string; value: WoodMaterial }[] = [
-  { name: 'Dark Walnut', value: 'walnut' },
-  { name: 'Light Oak', value: 'oak' },
-  { name: 'Cherry Wood', value: 'cherry' },
-  { name: 'Reclaimed Pine', value: 'pine' },
+const MATERIALS: { name: string; value: WoodMaterial; image: string }[] = [
+  { 
+    name: 'Dark Walnut', 
+    value: 'walnut',
+    image: "https://images.unsplash.com/photo-1611486212330-f3719bfecf24?q=80&w=200&auto=format&fit=crop"
+  },
+  { 
+    name: 'Light Oak', 
+    value: 'oak',
+    image: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=200&auto=format&fit=crop"
+  },
+  { 
+    name: 'Cherry Wood', 
+    value: 'cherry',
+    image: "https://images.unsplash.com/photo-1501127122-f385ca6ddd9d?q=80&w=200&auto=format&fit=crop"
+  },
+  { 
+    name: 'Reclaimed Pine', 
+    value: 'pine',
+    image: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=200&auto=format&fit=crop"
+  },
 ];
 
 const COLORS = [
@@ -49,18 +65,31 @@ const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProp
           <Trees size={18} />
           <h3 className="font-semibold uppercase tracking-wider text-sm">Wood Material</h3>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {MATERIALS.map((mat) => (
             <button
               key={mat.value}
               onClick={() => onUpdate({ material: mat.value })}
-              className={`px-3 py-2 text-xs rounded-lg border transition-all ${
+              className={`group relative h-20 rounded-lg overflow-hidden border-2 transition-all ${
                 design.material === mat.value 
-                  ? 'bg-amber-700 border-amber-500 text-white' 
-                  : 'bg-black/20 border-amber-900/50 text-amber-200/60 hover:border-amber-700'
+                  ? 'border-amber-500 ring-2 ring-amber-500/20' 
+                  : 'border-transparent hover:border-amber-700'
               }`}
             >
-              {mat.name}
+              <img 
+                src={mat.image} 
+                alt={mat.name} 
+                className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-2 text-center">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white drop-shadow-md">
+                  {mat.name}
+                </span>
+                {design.material === mat.value && (
+                  <Check size={16} className="text-amber-400 mt-1" />
+                )}
+              </div>
             </button>
           ))}
         </div>
