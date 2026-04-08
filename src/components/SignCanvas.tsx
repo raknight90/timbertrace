@@ -23,8 +23,8 @@ interface SignCanvasProps {
   showGrid?: boolean;
   snapToGrid?: boolean;
   isPrintMode?: boolean;
-  selectedId: string | 'text' | null;
-  onSelect: (id: string | 'text' | null) => void;
+  selectedIds: string[];
+  onSelect: (id: string | 'text' | null, isMulti: boolean) => void;
   onUpdateDesign?: (updates: Partial<EngravingDesign>) => void;
   onUpdateDecoration?: (id: string, updates: Partial<Decoration>) => void;
   onRemoveDecoration?: (id: string) => void;
@@ -38,7 +38,7 @@ const SignCanvas = ({
   showGrid,
   snapToGrid = true,
   isPrintMode = false,
-  selectedId,
+  selectedIds,
   onSelect,
   onUpdateDesign, 
   onUpdateDecoration, 
@@ -47,6 +47,8 @@ const SignCanvas = ({
   onBringToFront
 }: SignCanvasProps) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [initialPositions, setInitialPositions] = useState<Record<string, { x: number, y: number }>>({});
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const ppi = 25; 
@@ -65,46 +67,67 @@ const SignCanvas = ({
   const handleMouseDown = (e: React.MouseEvent, targetId: string | 'text') => {
     e.stopPropagation();
     
-    // Check if locked
-    if (targetId === 'text' && design.textLocked) return;
-    if (targetId !== 'text') {
-      const dec = design.decorations.find(d => d.id === targetId);
-      if (dec?.locked) return;
+    const isMulti = e.shiftKey;
+    const isAlreadySelected = selectedIds.includes(targetId);
+
+    if (!isAlreadySelected && !isMulti) {
+      onSelect(targetId, false);
+    } else if (isMulti) {
+      onSelect(targetId, true);
     }
 
-    onSelect(targetId);
-    setIsDragging(true);
+    // Prepare for dragging
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDragStart({
+        x: ((e.clientX - rect.left) / rect.width) * 100,
+        y: ((e.clientY - rect.top) / rect.height) * 100
+      });
+
+      const positions: Record<string, { x: number, y: number }> = {};
+      const idsToMove = isAlreadySelected ? selectedIds : (isMulti ? [...selectedIds, targetId] : [targetId]);
+      
+      idsToMove.forEach(id => {
+        if (id === 'text') {
+          positions['text'] = { ...design.textPosition };
+        } else {
+          const dec = design.decorations.find(d => d.id === id);
+          if (dec) positions[id] = { ...dec.position };
+        }
+      });
+      setInitialPositions(positions);
+      setIsDragging(true);
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !selectedId || !canvasRef.current) return;
+    if (!isDragging || !canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
-    let x = ((e.clientX - rect.left) / rect.width) * 100;
-    let y = ((e.clientY - rect.top) / rect.height) * 100;
+    const currentX = ((e.clientX - rect.left) / rect.width) * 100;
+    const currentY = ((e.clientY - rect.top) / rect.height) * 100;
+
+    let dx = currentX - dragStart.x;
+    let dy = currentY - dragStart.y;
 
     if (snapToGrid) {
-      if (Math.abs(x - 50) < 2) x = 50;
-      if (Math.abs(y - 50) < 2) y = 50;
-
       const gridStepX = (1 / design.width) * 100;
       const gridStepY = (1 / design.height) * 100;
-      
-      const snappedX = Math.round(x / gridStepX) * gridStepX;
-      const snappedY = Math.round(y / gridStepY) * gridStepY;
-
-      if (Math.abs(x - snappedX) < 1.5) x = snappedX;
-      if (Math.abs(y - snappedY) < 1.5) y = snappedY;
+      dx = Math.round(dx / gridStepX) * gridStepX;
+      dy = Math.round(dy / gridStepY) * gridStepY;
     }
 
-    const constrainedX = Math.max(0, Math.min(100, x));
-    const constrainedY = Math.max(0, Math.min(100, y));
+    Object.entries(initialPositions).forEach(([id, pos]) => {
+      const newX = Math.max(0, Math.min(100, pos.x + dx));
+      const newY = Math.max(0, Math.min(100, pos.y + dy));
 
-    if (selectedId === 'text') {
-      onUpdateDesign?.({ textPosition: { x: constrainedX, y: constrainedY } });
-    } else {
-      onUpdateDecoration?.(selectedId, { position: { x: constrainedX, y: constrainedY } });
-    }
+      if (id === 'text') {
+        if (!design.textLocked) onUpdateDesign?.({ textPosition: { x: newX, y: newY } });
+      } else {
+        const dec = design.decorations.find(d => d.id === id);
+        if (dec && !dec.locked) onUpdateDecoration?.(id, { position: { x: newX, y: newY } });
+      }
+    });
   };
 
   const handleMouseUp = () => {
@@ -113,16 +136,9 @@ const SignCanvas = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!selectedId) return;
+      if (selectedIds.length === 0) return;
       const isInputFocused = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '');
       if (isInputFocused) return;
-
-      // Check if locked
-      if (selectedId === 'text' && design.textLocked) return;
-      if (selectedId !== 'text') {
-        const dec = design.decorations.find(d => d.id === selectedId);
-        if (dec?.locked) return;
-      }
 
       const step = e.shiftKey ? 2 : 0.5;
       let dx = 0;
@@ -135,33 +151,36 @@ const SignCanvas = ({
         case 'ArrowDown': dy = step; break;
         case 'Delete':
         case 'Backspace':
-          if (selectedId !== 'text') {
-            onRemoveDecoration?.(selectedId);
-            onSelect(null);
-          }
+          selectedIds.forEach(id => {
+            if (id !== 'text') onRemoveDecoration?.(id);
+          });
           return;
         default: return;
       }
 
       e.preventDefault();
 
-      if (selectedId === 'text') {
-        const newX = Math.max(0, Math.min(100, design.textPosition.x + dx));
-        const newY = Math.max(0, Math.min(100, design.textPosition.y + dy));
-        onUpdateDesign?.({ textPosition: { x: newX, y: newY } });
-      } else {
-        const dec = design.decorations.find(d => d.id === selectedId);
-        if (dec) {
-          const newX = Math.max(0, Math.min(100, dec.position.x + dx));
-          const newY = Math.max(0, Math.min(100, dec.position.y + dy));
-          onUpdateDecoration?.(selectedId, { position: { x: newX, y: newY } });
+      selectedIds.forEach(id => {
+        if (id === 'text') {
+          if (!design.textLocked) {
+            const newX = Math.max(0, Math.min(100, design.textPosition.x + dx));
+            const newY = Math.max(0, Math.min(100, design.textPosition.y + dy));
+            onUpdateDesign?.({ textPosition: { x: newX, y: newY } });
+          }
+        } else {
+          const dec = design.decorations.find(d => d.id === id);
+          if (dec && !dec.locked) {
+            const newX = Math.max(0, Math.min(100, dec.position.x + dx));
+            const newY = Math.max(0, Math.min(100, dec.position.y + dy));
+            onUpdateDecoration?.(id, { position: { x: newX, y: newY } });
+          }
         }
-      }
+      });
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, design, onUpdateDesign, onUpdateDecoration, onRemoveDecoration, onSelect]);
+  }, [selectedIds, design, onUpdateDesign, onUpdateDecoration, onRemoveDecoration]);
 
   useEffect(() => {
     if (isDragging) {
@@ -189,7 +208,7 @@ const SignCanvas = ({
   return (
     <div 
       className="flex items-center justify-center w-full min-h-[550px] p-12 bg-black/20 rounded-2xl border border-amber-900/10"
-      onClick={() => onSelect(null)}
+      onClick={() => onSelect(null, false)}
     >
       <div 
         ref={canvasRef}
@@ -242,7 +261,7 @@ const SignCanvas = ({
         {/* Main Text Layer */}
         {!design.textHidden && (
           <div 
-            className={`absolute transition-shadow ${selectedId === 'text' ? 'z-50' : 'z-10'} ${design.textLocked ? 'cursor-default' : 'cursor-move'}`}
+            className={`absolute transition-shadow ${selectedIds.includes('text') ? 'z-50' : 'z-10'} ${design.textLocked ? 'cursor-default' : 'cursor-move'}`}
             style={{
               left: `${design.textPosition.x}%`,
               top: `${design.textPosition.y}%`,
@@ -252,7 +271,7 @@ const SignCanvas = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div 
-              className={`relative group/text p-4 rounded-lg border-2 transition-all ${selectedId === 'text' ? 'border-amber-500 bg-amber-500/10' : 'border-transparent hover:border-amber-500/30'}`}
+              className={`relative group/text p-4 rounded-lg border-2 transition-all ${selectedIds.includes('text') ? 'border-amber-500 bg-amber-500/10' : 'border-transparent hover:border-amber-500/30'}`}
             >
               {design.textLocked && (
                 <div className="absolute -top-2 -right-2 bg-amber-500 text-black p-1 rounded-full shadow-lg">
@@ -272,7 +291,7 @@ const SignCanvas = ({
                 {design.text || "Your Text Here"}
               </h2>
 
-              {selectedId === 'text' && !design.textLocked && (
+              {selectedIds.length === 1 && selectedIds[0] === 'text' && !design.textLocked && (
                 <div className={`absolute ${design.textPosition.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
                   <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
                     <Maximize size={12} className="text-amber-200/60" />
@@ -323,7 +342,7 @@ const SignCanvas = ({
         {/* Decorations Layer */}
         {design.decorations.map((dec) => {
           if (dec.hidden) return null;
-          const isSelected = selectedId === dec.id;
+          const isSelected = selectedIds.includes(dec.id);
           return (
             <div 
               key={dec.id}
@@ -368,7 +387,7 @@ const SignCanvas = ({
                   </span>
                 )}
 
-                {isSelected && !dec.locked && (
+                {isSelected && selectedIds.length === 1 && !dec.locked && (
                   <div className={`absolute ${dec.position.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
                     <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
                       <Maximize size={12} className="text-amber-200/60" />

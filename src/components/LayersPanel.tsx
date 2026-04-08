@@ -8,14 +8,14 @@ import { Layers, Eye, EyeOff, Lock, Unlock, ChevronUp, ChevronDown, Type, Image 
 
 interface LayersPanelProps {
   design: EngravingDesign;
-  selectedId: string | 'text' | null;
-  onSelect: (id: string | 'text' | null) => void;
+  selectedIds: string[];
+  onSelect: (id: string | 'text' | null, isMulti: boolean) => void;
   onToggleVisibility: (id: string | 'text') => void;
   onToggleLock: (id: string | 'text') => void;
   onReorder: (id: string, direction: 'up' | 'down') => void;
 }
 
-const LayersPanel = ({ design, selectedId, onSelect, onToggleVisibility, onToggleLock, onReorder }: LayersPanelProps) => {
+const LayersPanel = ({ design, selectedIds, onSelect, onToggleVisibility, onToggleLock, onReorder }: LayersPanelProps) => {
   const allLayers = [
     { id: 'text', name: 'Main Text', type: 'text', locked: design.textLocked, hidden: design.textHidden },
     ...design.decorations.map(d => ({ 
@@ -39,9 +39,9 @@ const LayersPanel = ({ design, selectedId, onSelect, onToggleVisibility, onToggl
           {allLayers.map((layer, index) => (
             <div 
               key={layer.id}
-              onClick={() => onSelect(layer.id)}
+              onClick={(e) => onSelect(layer.id, e.shiftKey)}
               className={`group flex items-center gap-3 p-2 rounded-lg border transition-all cursor-pointer ${
-                selectedId === layer.id 
+                selectedIds.includes(layer.id) 
                   ? 'bg-amber-500/20 border-amber-500/50' 
                   : 'bg-black/20 border-transparent hover:border-amber-900/30'
               }`}
