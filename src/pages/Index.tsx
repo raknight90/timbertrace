@@ -540,9 +540,9 @@ const Index = () => {
           <div className="lg:col-span-9 flex flex-col items-center justify-start pt-4 lg:sticky lg:top-24">
             <div 
               ref={editorRef}
-              className="w-full overflow-auto custom-scrollbar max-h-[calc(100vh-12rem)] p-8 bg-black/10 rounded-2xl border border-amber-900/5"
+              className="w-full overflow-auto custom-scrollbar max-h-[calc(100vh-8rem)] p-4 sm:p-8 bg-black/10 rounded-2xl border border-amber-900/5"
             >
-              <div className="mb-6 flex items-center justify-between w-full max-w-[1000px] mx-auto no-print">
+              <div className="mb-6 flex items-center justify-between w-full max-w-full mx-auto no-print">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">
                   {isPrintMode ? "Print Ready Mode Active" : "Hold Ctrl + Scroll to Zoom"}

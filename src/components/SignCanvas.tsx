@@ -53,12 +53,12 @@ const SignCanvas = ({
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const ppi = 25; 
+  const ppi = 35; // Increased PPI for a larger base size
   let displayWidth = design.width * ppi;
   let displayHeight = design.height * ppi;
 
-  const maxWidth = 1000;
-  const maxHeight = 600;
+  const maxWidth = 1400; // Increased from 1000
+  const maxHeight = 900; // Increased from 600
 
   if (displayWidth > maxWidth || displayHeight > maxHeight) {
     const scale = Math.min(maxWidth / displayWidth, maxHeight / displayHeight);
@@ -182,7 +182,7 @@ const SignCanvas = ({
 
   return (
     <div 
-      className="flex items-center justify-center w-full min-h-[550px] p-12 bg-black/20 rounded-2xl border border-amber-900/10"
+      className="flex items-center justify-center w-full min-h-[600px] p-4 sm:p-12 bg-black/20 rounded-2xl border border-amber-900/10"
       onClick={() => onSelect(null)}
     >
       <div 
