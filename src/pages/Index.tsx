@@ -190,8 +190,9 @@ const Index = () => {
       </header>
 
       <main className="container mx-auto px-6 py-10 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-4 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          {/* Sticky Sidebar Controls */}
+          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar">
             <DesignToolbar 
               design={currentDesign} 
               onUpdate={handleUpdateDesign}
@@ -210,10 +211,12 @@ const Index = () => {
             />
           </div>
 
-          <div className="lg:col-span-8 flex flex-col items-center justify-start pt-4">
-            <div className="w-full sticky top-28">
-              <div className="mb-6 flex items-center justify-between w-full max-w-[800px]">
+          {/* Sticky Canvas Editor */}
+          <div className="lg:col-span-8 flex flex-col items-center justify-start pt-4 lg:sticky lg:top-24">
+            <div className="w-full">
+              <div className="mb-6 flex items-center justify-between w-full max-w-[800px] mx-auto">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
+                <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">Drag elements to position</div>
               </div>
               
               <div className="flex justify-center w-full">

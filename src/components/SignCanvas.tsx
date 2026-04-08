@@ -80,7 +80,6 @@ const SignCanvas = ({
     }
   }, [isDragging]);
 
-  // Shared engraving style for text and glyph decorations
   const engravingStyle = {
     color: design.fontColor,
     textShadow: `
@@ -94,29 +93,29 @@ const SignCanvas = ({
 
   return (
     <div 
-      className="flex items-center justify-center w-full min-h-[550px] p-8 bg-black/20 rounded-2xl border border-amber-900/10"
+      className="flex items-center justify-center w-full min-h-[550px] p-12 bg-black/20 rounded-2xl border border-amber-900/10"
       onClick={() => setSelectedId(null)}
     >
       <div 
         ref={canvasRef}
         id={id}
         onMouseMove={handleMouseMove}
-        className="relative overflow-hidden rounded-sm transition-all duration-300 ease-out group cursor-default"
+        className="relative transition-all duration-300 ease-out group cursor-default"
         style={{
           width: `${displayWidth}px`,
           height: `${displayHeight}px`,
-          backgroundColor: WOOD_COLORS[design.material],
-          boxShadow: `
-            0 20px 50px rgba(0,0,0,0.6),
-            inset 0 0 2px rgba(255,255,255,0.2),
-            inset 0 0 20px rgba(0,0,0,0.3)
-          `,
-          border: '1px solid rgba(0,0,0,0.3)'
         }}
       >
-        <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none" />
+        {/* Background Wood Layer (Clipped) */}
+        <div className="absolute inset-0 overflow-hidden rounded-sm shadow-2xl border border-black/30">
+          <div 
+            className="absolute inset-0"
+            style={{ backgroundColor: WOOD_COLORS[design.material] }}
+          />
+          <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none" />
+        </div>
 
         {/* Main Text Layer */}
         <div 
@@ -144,7 +143,7 @@ const SignCanvas = ({
             </h2>
 
             {selectedId === 'text' && (
-              <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto">
+              <div className={`absolute ${design.textPosition.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
                 <div className="flex items-center gap-2 px-2">
                   <Maximize size={12} className="text-amber-200/60" />
                   <div className="w-32">
@@ -205,7 +204,7 @@ const SignCanvas = ({
                 )}
 
                 {isSelected && (
-                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto">
+                  <div className={`absolute ${dec.position.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
                     <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
                       <Maximize size={12} className="text-amber-200/60" />
                       <div className="w-24">
