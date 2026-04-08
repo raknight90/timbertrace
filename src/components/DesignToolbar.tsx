@@ -28,7 +28,6 @@ const COLORS = [
   { name: 'Natural Carved', value: 'rgba(20, 10, 5, 0.9)' },
   { name: 'Charcoal Black', value: '#1a1a1a' },
   { name: 'Antique White', value: '#f5f5f0' },
-  { name: 'Metallic Gold', value: '#d4af37' },
   { name: 'Metallic Silver', value: '#c0c0c0' },
   { name: 'Barn Red', value: '#7c0a02' },
 ];
