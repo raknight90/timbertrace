@@ -225,29 +225,41 @@ const Index = () => {
         });
         const thumbnail = canvas.toDataURL('image/jpeg', 0.5);
 
-        const newDesign = {
-          ...currentDesign,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: Date.now(),
-          thumbnail
-        };
-        setLibrary(prev => [newDesign, ...prev]);
-        showSuccess("Design saved to library!");
+        const isExisting = library.some(d => d.id === currentDesign.id);
+
+        if (isExisting) {
+          setLibrary(prev => prev.map(d => 
+            d.id === currentDesign.id 
+              ? { ...currentDesign, thumbnail, createdAt: Date.now() } 
+              : d
+          ));
+          showSuccess("Design updated in library!");
+        } else {
+          const newDesign = {
+            ...currentDesign,
+            createdAt: Date.now(),
+            thumbnail
+          };
+          setLibrary(prev => [newDesign, ...prev]);
+          showSuccess("Design saved to library!");
+        }
       } catch (err) {
         console.error("Thumbnail generation failed", err);
-        const newDesign = {
-          ...currentDesign,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: Date.now()
-        };
-        setLibrary(prev => [newDesign, ...prev]);
-        showSuccess("Design saved (without preview)");
+        const isExisting = library.some(d => d.id === currentDesign.id);
+        
+        if (isExisting) {
+          setLibrary(prev => prev.map(d => d.id === currentDesign.id ? currentDesign : d));
+          showSuccess("Design updated (without preview)");
+        } else {
+          setLibrary(prev => [currentDesign, ...prev]);
+          showSuccess("Design saved (without preview)");
+        }
       }
     }, 50);
   };
 
   const handleLoadDesign = (design: EngravingDesign) => {
-    setCurrentDesign(design);
+    setCurrentDesign(JSON.parse(JSON.stringify(design)));
     setHistory([JSON.parse(JSON.stringify(design))]);
     setHistoryIndex(0);
     setSelectedId(null);
@@ -286,6 +298,8 @@ const Index = () => {
       }
     }, 50);
   };
+
+  const isExistingInLibrary = library.some(d => d.id === currentDesign.id);
 
   return (
     <div 
@@ -377,6 +391,7 @@ const Index = () => {
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar">
             <DesignToolbar 
               design={currentDesign} 
+              isExisting={isExistingInLibrary}
               onUpdate={handleUpdateDesign}
               onSave={handleSaveToLibrary}
               onExportPNG={handleExportPNG}

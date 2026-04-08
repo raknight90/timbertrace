@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Trees, Check, Space, Download, Save } from 'lucide-react';
+import { Type, Maximize2, Trees, Check, Space, Download, Save, RefreshCw } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -39,12 +39,13 @@ const COLORS = [
 
 interface DesignToolbarProps {
   design: EngravingDesign;
+  isExisting: boolean;
   onUpdate: (updates: Partial<EngravingDesign>) => void;
   onSave: () => void;
   onExportPNG: () => void;
 }
 
-const DesignToolbar = ({ design, onUpdate, onSave, onExportPNG }: DesignToolbarProps) => {
+const DesignToolbar = ({ design, isExisting, onUpdate, onSave, onExportPNG }: DesignToolbarProps) => {
   return (
     <div className="bg-[#2a1a0a]/90 backdrop-blur-md border border-amber-900/30 p-6 rounded-xl shadow-xl space-y-8 text-amber-50">
       {/* Wood Type Selection */}
@@ -204,10 +205,21 @@ const DesignToolbar = ({ design, onUpdate, onSave, onExportPNG }: DesignToolbarP
       <div className="pt-4 space-y-3">
         <Button 
           onClick={onSave}
-          className="w-full bg-amber-700 hover:bg-amber-600 text-white border-none h-11"
+          className={`w-full text-white border-none h-11 transition-all ${
+            isExisting ? 'bg-amber-600 hover:bg-amber-500' : 'bg-amber-700 hover:bg-amber-600'
+          }`}
         >
-          <Save size={18} className="mr-2" />
-          Save to Library
+          {isExisting ? (
+            <>
+              <RefreshCw size={18} className="mr-2" />
+              Update Design
+            </>
+          ) : (
+            <>
+              <Save size={18} className="mr-2" />
+              Save to Library
+            </>
+          )}
         </Button>
         <Button 
           onClick={onExportPNG}
