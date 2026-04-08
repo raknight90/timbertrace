@@ -21,22 +21,22 @@ const MATERIALS: { name: string; value: WoodMaterial; image: string }[] = [
   { 
     name: 'Dark Walnut', 
     value: 'walnut',
-    image: "https://images.unsplash.com/photo-1611486212330-f3719bfecf24?q=80&w=200&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1622398925373-3f91b1e275f5?q=80&w=200&auto=format&fit=crop"
   },
   { 
     name: 'Light Oak', 
     value: 'oak',
-    image: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=200&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?q=80&w=200&auto=format&fit=crop"
   },
   { 
     name: 'Cherry Wood', 
     value: 'cherry',
-    image: "https://images.unsplash.com/photo-1501127122-f385ca6ddd9d?q=80&w=200&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1531685250784-7569952593d2?q=80&w=200&auto=format&fit=crop"
   },
   { 
     name: 'Reclaimed Pine', 
     value: 'pine',
-    image: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=200&auto=format&fit=crop"
+    image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=200&auto=format&fit=crop"
   },
 ];
 

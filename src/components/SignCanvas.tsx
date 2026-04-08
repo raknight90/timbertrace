@@ -4,10 +4,10 @@ import React from 'react';
 import { EngravingDesign, WoodMaterial } from '@/types/engraving';
 
 const MATERIAL_TEXTURES: Record<WoodMaterial, string> = {
-  walnut: "https://images.unsplash.com/photo-1611486212330-f3719bfecf24?q=80&w=2070&auto=format&fit=crop",
-  oak: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=2069&auto=format&fit=crop",
-  cherry: "https://images.unsplash.com/photo-1501127122-f385ca6ddd9d?q=80&w=1935&auto=format&fit=crop",
-  pine: "https://images.unsplash.com/photo-1516455590571-18256e5bb9ff?q=80&w=2070&auto=format&fit=crop"
+  walnut: "https://images.unsplash.com/photo-1622398925373-3f91b1e275f5?q=80&w=2074&auto=format&fit=crop",
+  oak: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?q=80&w=2070&auto=format&fit=crop",
+  cherry: "https://images.unsplash.com/photo-1531685250784-7569952593d2?q=80&w=1974&auto=format&fit=crop",
+  pine: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop"
 };
 
 interface SignCanvasProps {
@@ -21,7 +21,7 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
   return (
     <div 
       id={id}
-      className="relative overflow-hidden rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-[12px] border-[#1a0f05] transition-all duration-700 ease-in-out"
+      className="relative overflow-hidden rounded-sm transition-all duration-700 ease-in-out group"
       style={{
         aspectRatio: `${aspectRatio}`,
         width: '100%',
@@ -29,13 +29,21 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
         backgroundImage: `url("${MATERIAL_TEXTURES[design.material]}")`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        // Physical board effect: Beveled edges and heavy shadow
+        boxShadow: `
+          0 20px 50px rgba(0,0,0,0.6),
+          inset 0 0 2px rgba(255,255,255,0.2),
+          inset 0 0 20px rgba(0,0,0,0.3)
+        `,
+        border: '1px solid rgba(0,0,0,0.3)'
       }}
     >
-      {/* Realistic Wood Grain Overlay for depth */}
-      <div className="absolute inset-0 opacity-30 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay" />
+      {/* Realistic Wood Grain Overlay - adds tactile texture */}
+      <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay" />
       
-      {/* Subtle vignette for realism */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_40%,rgba(0,0,0,0.3)_100%)] pointer-events-none" />
+      {/* Lighting: Top-down light source for the board */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none" />
 
       {/* Engraving Effect Container */}
       <div className="absolute inset-0 flex items-center justify-center p-12">
@@ -47,17 +55,19 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
               fontSize: `${design.fontSize}px`,
               color: design.fontColor,
               // The "Carved" look:
-              // Multiple shadows to create depth and a highlight on the edge
+              // 1. Dark top shadow (the "hole" depth)
+              // 2. Light bottom highlight (the "edge" catching light)
+              // 3. Inner shadow simulation
               textShadow: `
-                -1px -1px 1px rgba(0,0,0,0.8), 
-                1px 1px 1px rgba(255,255,255,0.15),
-                inset 0 2px 4px rgba(0,0,0,0.5)
+                0px -2px 1px rgba(0,0,0,0.9),
+                0px 1px 1px rgba(255,255,255,0.2),
+                0px 4px 8px rgba(0,0,0,0.4)
               `,
               // Blend mode to let some grain show through if it's a dark color
               mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal',
-              filter: 'contrast(1.1) brightness(0.9)'
+              filter: 'contrast(1.1) brightness(0.85) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))'
             }}
-            className="text-center leading-tight select-none font-bold"
+            className="text-center leading-tight select-none font-bold tracking-tight"
           >
             {design.text || "Your Text Here"}
           </h2>
@@ -72,8 +82,9 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
                 top: `${dec.position.y}%`,
                 transform: `translate(-50%, -50%) scale(${dec.scale})`,
                 color: design.fontColor,
-                textShadow: '-1px -1px 1px rgba(0,0,0,0.7), 1px 1px 1px rgba(255,255,255,0.1)',
+                textShadow: '0px -1px 1px rgba(0,0,0,0.8), 0px 1px 1px rgba(255,255,255,0.1)',
                 mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal',
+                filter: 'brightness(0.8)'
               }}
             >
               <span className="text-5xl">{dec.content}</span>
@@ -83,7 +94,7 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
       </div>
 
       {/* Measurement Labels */}
-      <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md px-4 py-1.5 rounded-full text-[11px] text-amber-100 font-mono border border-amber-900/50 shadow-lg">
+      <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md px-4 py-1.5 rounded-full text-[11px] text-amber-100 font-mono border border-amber-900/50 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
         {design.width}" x {design.height}" • {design.material.toUpperCase()}
       </div>
     </div>
