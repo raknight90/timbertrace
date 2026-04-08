@@ -6,7 +6,6 @@ import SignCanvas from '@/components/SignCanvas';
 import DesignToolbar from '@/components/DesignToolbar';
 import DecorationPicker from '@/components/DecorationPicker';
 import DesignLibrary from '@/components/DesignLibrary';
-import LayersPanel from '@/components/LayersPanel';
 import { showSuccess, showError } from '@/utils/toast';
 import html2canvas from 'html2canvas';
 import { Hammer, Plus, Undo2, Redo2, Grid3X3, Printer } from 'lucide-react';
@@ -196,39 +195,6 @@ const Index = () => {
     setCurrentDesign(updated);
     addToHistory(updated);
     showSuccess("Moved to front");
-  };
-
-  const handleReorderLayer = (id: string, direction: 'up' | 'down') => {
-    const index = currentDesign.decorations.findIndex(d => d.id === id);
-    if (index === -1) return;
-
-    const newDecorations = [...currentDesign.decorations];
-    const targetIndex = direction === 'up' ? index + 1 : index - 1;
-
-    if (targetIndex >= 0 && targetIndex < newDecorations.length) {
-      [newDecorations[index], newDecorations[targetIndex]] = [newDecorations[targetIndex], newDecorations[index]];
-      const updated = { ...currentDesign, decorations: newDecorations };
-      setCurrentDesign(updated);
-      addToHistory(updated);
-    }
-  };
-
-  const handleToggleVisibility = (id: string | 'text') => {
-    if (id === 'text') {
-      handleUpdateDesign({ textHidden: !currentDesign.textHidden });
-    } else {
-      const dec = currentDesign.decorations.find(d => d.id === id);
-      if (dec) handleUpdateDecoration(id, { hidden: !dec.hidden });
-    }
-  };
-
-  const handleToggleLock = (id: string | 'text') => {
-    if (id === 'text') {
-      handleUpdateDesign({ textLocked: !currentDesign.textLocked });
-    } else {
-      const dec = currentDesign.decorations.find(d => d.id === id);
-      if (dec) handleUpdateDecoration(id, { locked: !dec.locked });
-    }
   };
 
   const handleRemoveDecoration = (id: string) => {
@@ -429,14 +395,6 @@ const Index = () => {
               onUpdate={handleUpdateDesign}
               onSave={handleSaveToLibrary}
               onExportPNG={handleExportPNG}
-            />
-            <LayersPanel 
-              design={currentDesign}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              onToggleVisibility={handleToggleVisibility}
-              onToggleLock={handleToggleLock}
-              onReorder={handleReorderLayer}
             />
             <DecorationPicker 
               onAdd={handleAddDecoration} 
