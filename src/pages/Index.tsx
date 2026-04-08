@@ -38,6 +38,7 @@ const Index = () => {
   const [showGrid, setShowGrid] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | 'text' | null>(null);
 
   // Load library from local storage
   useEffect(() => {
@@ -99,6 +100,7 @@ const Index = () => {
     setCurrentDesign(newDesign);
     setHistory([JSON.parse(JSON.stringify(newDesign))]);
     setHistoryIndex(0);
+    setSelectedId(null);
     showSuccess("Started a new design");
   };
 
@@ -126,6 +128,7 @@ const Index = () => {
     };
     setCurrentDesign(updated);
     addToHistory(updated);
+    setSelectedId(newDec.id);
     showSuccess("Decoration added!");
   };
 
@@ -146,6 +149,7 @@ const Index = () => {
     };
     setCurrentDesign(updated);
     addToHistory(updated);
+    setSelectedId(newDec.id);
     showSuccess("Image added!");
   };
 
@@ -165,6 +169,7 @@ const Index = () => {
     };
     setCurrentDesign(updated);
     addToHistory(updated);
+    setSelectedId(newDec.id);
     showSuccess("Decoration duplicated!");
   };
 
@@ -199,6 +204,7 @@ const Index = () => {
     };
     setCurrentDesign(updated);
     addToHistory(updated);
+    setSelectedId(null);
     showSuccess("Decoration removed");
   };
 
@@ -206,38 +212,45 @@ const Index = () => {
     const element = document.getElementById('sign-preview');
     if (!element) return;
 
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 0.5,
-        useCORS: true,
-        backgroundColor: null,
-      });
-      const thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+    // Deselect before saving thumbnail
+    setSelectedId(null);
 
-      const newDesign = {
-        ...currentDesign,
-        id: Math.random().toString(36).substr(2, 9),
-        createdAt: Date.now(),
-        thumbnail
-      };
-      setLibrary(prev => [newDesign, ...prev]);
-      showSuccess("Design saved to library!");
-    } catch (err) {
-      console.error("Thumbnail generation failed", err);
-      const newDesign = {
-        ...currentDesign,
-        id: Math.random().toString(36).substr(2, 9),
-        createdAt: Date.now()
-      };
-      setLibrary(prev => [newDesign, ...prev]);
-      showSuccess("Design saved (without preview)");
-    }
+    // Wait for render
+    setTimeout(async () => {
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 0.5,
+          useCORS: true,
+          backgroundColor: null,
+        });
+        const thumbnail = canvas.toDataURL('image/jpeg', 0.5);
+
+        const newDesign = {
+          ...currentDesign,
+          id: Math.random().toString(36).substr(2, 9),
+          createdAt: Date.now(),
+          thumbnail
+        };
+        setLibrary(prev => [newDesign, ...prev]);
+        showSuccess("Design saved to library!");
+      } catch (err) {
+        console.error("Thumbnail generation failed", err);
+        const newDesign = {
+          ...currentDesign,
+          id: Math.random().toString(36).substr(2, 9),
+          createdAt: Date.now()
+        };
+        setLibrary(prev => [newDesign, ...prev]);
+        showSuccess("Design saved (without preview)");
+      }
+    }, 50);
   };
 
   const handleLoadDesign = (design: EngravingDesign) => {
     setCurrentDesign(design);
     setHistory([JSON.parse(JSON.stringify(design))]);
     setHistoryIndex(0);
+    setSelectedId(null);
     showSuccess("Design loaded!");
   };
 
@@ -250,22 +263,28 @@ const Index = () => {
     const element = document.getElementById('sign-preview');
     if (!element) return;
 
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 3, // High quality
-        useCORS: true,
-        backgroundColor: null,
-      });
-      
-      const link = document.createElement('a');
-      link.download = `${currentDesign.name || currentDesign.text || 'wood-sign'}${isPrintMode ? '-print' : ''}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      showSuccess("PNG exported successfully!");
-    } catch (err) {
-      showError("Failed to export PNG");
-      console.error(err);
-    }
+    // Deselect everything before export
+    setSelectedId(null);
+
+    // Small delay to ensure React has rendered the deselected state
+    setTimeout(async () => {
+      try {
+        const canvas = await html2canvas(element, {
+          scale: 3, // High quality
+          useCORS: true,
+          backgroundColor: null,
+        });
+        
+        const link = document.createElement('a');
+        link.download = `${currentDesign.name || currentDesign.text || 'wood-sign'}${isPrintMode ? '-print' : ''}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showSuccess("PNG exported successfully!");
+      } catch (err) {
+        showError("Failed to export PNG");
+        console.error(err);
+      }
+    }, 50);
   };
 
   return (
@@ -390,6 +409,8 @@ const Index = () => {
                   showGrid={showGrid}
                   snapToGrid={snapToGrid}
                   isPrintMode={isPrintMode}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
                   onUpdateDesign={handleUpdateDesign}
                   onUpdateDecoration={handleUpdateDecoration}
                   onRemoveDecoration={handleRemoveDecoration}

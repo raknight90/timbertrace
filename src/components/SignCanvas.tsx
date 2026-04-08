@@ -23,6 +23,8 @@ interface SignCanvasProps {
   showGrid?: boolean;
   snapToGrid?: boolean;
   isPrintMode?: boolean;
+  selectedId: string | 'text' | null;
+  onSelect: (id: string | 'text' | null) => void;
   onUpdateDesign?: (updates: Partial<EngravingDesign>) => void;
   onUpdateDecoration?: (id: string, updates: Partial<Decoration>) => void;
   onRemoveDecoration?: (id: string) => void;
@@ -36,13 +38,14 @@ const SignCanvas = ({
   showGrid,
   snapToGrid = true,
   isPrintMode = false,
+  selectedId,
+  onSelect,
   onUpdateDesign, 
   onUpdateDecoration, 
   onRemoveDecoration,
   onDuplicateDecoration,
   onBringToFront
 }: SignCanvasProps) => {
-  const [selectedId, setSelectedId] = useState<string | 'text' | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +64,7 @@ const SignCanvas = ({
 
   const handleMouseDown = (e: React.MouseEvent, targetId: string | 'text') => {
     e.stopPropagation();
-    setSelectedId(targetId);
+    onSelect(targetId);
     setIsDragging(true);
   };
 
@@ -119,7 +122,7 @@ const SignCanvas = ({
         case 'Backspace':
           if (selectedId !== 'text') {
             onRemoveDecoration?.(selectedId);
-            setSelectedId(null);
+            onSelect(null);
           }
           return;
         default: return;
@@ -143,7 +146,7 @@ const SignCanvas = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, design, onUpdateDesign, onUpdateDecoration, onRemoveDecoration]);
+  }, [selectedId, design, onUpdateDesign, onUpdateDecoration, onRemoveDecoration, onSelect]);
 
   useEffect(() => {
     if (isDragging) {
@@ -171,7 +174,7 @@ const SignCanvas = ({
   return (
     <div 
       className="flex items-center justify-center w-full min-h-[550px] p-12 bg-black/20 rounded-2xl border border-amber-900/10"
-      onClick={() => setSelectedId(null)}
+      onClick={() => onSelect(null)}
     >
       <div 
         ref={canvasRef}
