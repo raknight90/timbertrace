@@ -8,7 +8,6 @@ import DecorationPicker from '@/components/DecorationPicker';
 import DesignLibrary from '@/components/DesignLibrary';
 import { showSuccess, showError } from '@/utils/toast';
 import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { Hammer, Plus, Undo2, Redo2, Grid3X3 } from 'lucide-react';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { Button } from '@/components/ui/button';
@@ -246,33 +245,6 @@ const Index = () => {
     showSuccess("Design removed from library");
   };
 
-  const handleExportPDF = async () => {
-    const element = document.getElementById('sign-preview');
-    if (!element) return;
-
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: null,
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: currentDesign.width > currentDesign.height ? 'landscape' : 'portrait',
-        unit: 'in',
-        format: [currentDesign.width, currentDesign.height]
-      });
-
-      pdf.addImage(imgData, 'PNG', 0, 0, currentDesign.width, currentDesign.height);
-      pdf.save(`${currentDesign.name || currentDesign.text || 'wood-sign'}-template.pdf`);
-      showSuccess("PDF exported successfully!");
-    } catch (err) {
-      showError("Failed to export PDF");
-      console.error(err);
-    }
-  };
-
   const handleExportPNG = async () => {
     const element = document.getElementById('sign-preview');
     if (!element) return;
@@ -378,7 +350,6 @@ const Index = () => {
               design={currentDesign} 
               onUpdate={handleUpdateDesign}
               onSave={handleSaveToLibrary}
-              onExport={handleExportPDF}
               onExportPNG={handleExportPNG}
             />
             <DecorationPicker 
