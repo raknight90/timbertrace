@@ -22,6 +22,7 @@ interface SignCanvasProps {
   id?: string;
   showGrid?: boolean;
   snapToGrid?: boolean;
+  isPrintMode?: boolean;
   onUpdateDesign?: (updates: Partial<EngravingDesign>) => void;
   onUpdateDecoration?: (id: string, updates: Partial<Decoration>) => void;
   onRemoveDecoration?: (id: string) => void;
@@ -34,6 +35,7 @@ const SignCanvas = ({
   id, 
   showGrid,
   snapToGrid = true,
+  isPrintMode = false,
   onUpdateDesign, 
   onUpdateDecoration, 
   onRemoveDecoration,
@@ -70,7 +72,6 @@ const SignCanvas = ({
     let x = ((e.clientX - rect.left) / rect.width) * 100;
     let y = ((e.clientY - rect.top) / rect.height) * 100;
 
-    // Snapping Logic
     if (snapToGrid) {
       if (Math.abs(x - 50) < 2) x = 50;
       if (Math.abs(y - 50) < 2) y = 50;
@@ -151,7 +152,12 @@ const SignCanvas = ({
     }
   }, [isDragging]);
 
-  const engravingStyle = {
+  const engravingStyle = isPrintMode ? {
+    color: '#000000',
+    textShadow: 'none',
+    filter: 'none',
+    mixBlendMode: 'normal' as any
+  } : {
     color: design.fontColor,
     textShadow: `
       -1px -1px 1px rgba(0,0,0,0.6), 
@@ -178,34 +184,38 @@ const SignCanvas = ({
         }}
       >
         {/* Wood Sign Container */}
-        <div className="absolute inset-0 overflow-hidden rounded-sm shadow-2xl border border-black/40">
-          {/* Base Wood Color */}
+        <div className={`absolute inset-0 overflow-hidden rounded-sm shadow-2xl border ${isPrintMode ? 'border-gray-200' : 'border-black/40'}`}>
+          {/* Base Wood Color / Print Mode White */}
           <div 
-            className="absolute inset-0"
-            style={{ backgroundColor: WOOD_COLORS[design.material] }}
+            className="absolute inset-0 transition-colors duration-300"
+            style={{ backgroundColor: isPrintMode ? '#FFFFFF' : WOOD_COLORS[design.material] }}
           />
           
-          {/* Wood Grain Texture */}
-          <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
-          
-          {/* Chaffed/Beveled Edge Effect */}
-          <div className="absolute inset-0 pointer-events-none rounded-sm shadow-[inset_0_0_15px_rgba(0,0,0,0.7),inset_0_0_2px_rgba(0,0,0,0.9)]" />
-          
-          {/* Worn Edge Highlight (Sanded Look) */}
-          <div className="absolute inset-0 pointer-events-none rounded-sm border border-white/10 mix-blend-screen opacity-20" />
-          
-          {/* Lighting/Depth Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/20 pointer-events-none" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,transparent_70%)] pointer-events-none" />
+          {!isPrintMode && (
+            <>
+              {/* Wood Grain Texture */}
+              <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
+              
+              {/* Chaffed/Beveled Edge Effect */}
+              <div className="absolute inset-0 pointer-events-none rounded-sm shadow-[inset_0_0_15px_rgba(0,0,0,0.7),inset_0_0_2px_rgba(0,0,0,0.9)]" />
+              
+              {/* Worn Edge Highlight (Sanded Look) */}
+              <div className="absolute inset-0 pointer-events-none rounded-sm border border-white/10 mix-blend-screen opacity-20" />
+              
+              {/* Lighting/Depth Overlays */}
+              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/20 pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,transparent_70%)] pointer-events-none" />
+            </>
+          )}
           
           {/* Grid Overlay */}
           {showGrid && (
             <div 
-              className="absolute inset-0 pointer-events-none opacity-20"
+              className={`absolute inset-0 pointer-events-none ${isPrintMode ? 'opacity-10' : 'opacity-20'}`}
               style={{
                 backgroundImage: `
-                  linear-gradient(to right, rgba(255,255,255,0.2) 1px, transparent 1px),
-                  linear-gradient(to bottom, rgba(255,255,255,0.2) 1px, transparent 1px)
+                  linear-gradient(to right, ${isPrintMode ? 'black' : 'white'} 1px, transparent 1px),
+                  linear-gradient(to bottom, ${isPrintMode ? 'black' : 'white'} 1px, transparent 1px)
                 `,
                 backgroundSize: `${(1 / design.width) * 100}% ${(1 / design.height) * 100}%`
               }}
@@ -215,8 +225,8 @@ const SignCanvas = ({
           {/* Center Lines */}
           {showGrid && (
             <>
-              <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-amber-500/30 pointer-events-none" />
-              <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-amber-500/30 pointer-events-none" />
+              <div className={`absolute left-1/2 top-0 bottom-0 w-[1px] ${isPrintMode ? 'bg-black/20' : 'bg-amber-500/30'} pointer-events-none`} />
+              <div className={`absolute top-1/2 left-0 right-0 h-[1px] ${isPrintMode ? 'bg-black/20' : 'bg-amber-500/30'} pointer-events-none`} />
             </>
           )}
         </div>
@@ -320,8 +330,8 @@ const SignCanvas = ({
                     style={{
                       width: `${100 * dec.scale}px`,
                       height: 'auto',
-                      filter: 'brightness(0.8) contrast(1.2) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))',
-                      mixBlendMode: 'multiply'
+                      filter: isPrintMode ? 'grayscale(1) contrast(200%) brightness(0)' : 'brightness(0.8) contrast(1.2) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))',
+                      mixBlendMode: isPrintMode ? 'normal' : 'multiply'
                     }}
                   />
                 ) : (
@@ -408,9 +418,11 @@ const SignCanvas = ({
           );
         })}
 
-        <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md px-4 py-1.5 rounded-full text-[11px] text-amber-100 font-mono border border-amber-900/50 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-          {design.width}" x {design.height}" • {design.material.toUpperCase()}
-        </div>
+        {!isPrintMode && (
+          <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md px-4 py-1.5 rounded-full text-[11px] text-amber-100 font-mono border border-amber-900/50 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            {design.width}" x {design.height}" • {design.material.toUpperCase()}
+          </div>
+        )}
       </div>
     </div>
   );
