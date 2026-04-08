@@ -262,7 +262,7 @@ const DesignToolbar = ({
           <Button 
             onClick={onExportPNG}
             variant="outline"
-            className="border-amber-700 text-amber-200 hover:bg-amber-900/30 h-11"
+            className="border-amber-700 text-amber-400 hover:bg-amber-900/30 h-11"
           >
             <Download size={16} className="mr-2" />
             PNG
@@ -270,7 +270,7 @@ const DesignToolbar = ({
           <Button 
             onClick={onPrint}
             variant="outline"
-            className="border-amber-700 text-amber-200 hover:bg-amber-900/30 h-11"
+            className="border-amber-700 text-amber-400 hover:bg-amber-900/30 h-11"
           >
             <Printer size={16} className="mr-2" />
             Print
