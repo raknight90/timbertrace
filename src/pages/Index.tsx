@@ -353,6 +353,21 @@ const Index = () => {
     }, 50);
   };
 
+  const handlePrint = () => {
+    setSelectedId(null);
+    const wasPrintMode = isPrintMode;
+    setIsPrintMode(true);
+    
+    // Small delay to allow React to render the print-ready state
+    setTimeout(() => {
+      window.print();
+      // Restore previous mode after print dialog closes
+      if (!wasPrintMode) {
+        setIsPrintMode(false);
+      }
+    }, 100);
+  };
+
   const isExistingInLibrary = library.some(d => d.id === currentDesign.id);
 
   return (
@@ -363,7 +378,7 @@ const Index = () => {
         backgroundImage: 'radial-gradient(circle at center, rgba(42, 26, 10, 0.4) 0%, rgba(15, 10, 5, 1) 100%)',
       }}
     >
-      <header className="border-b border-amber-900/30 bg-black/60 backdrop-blur-xl sticky top-0 z-50">
+      <header className="border-b border-amber-900/30 bg-black/60 backdrop-blur-xl sticky top-0 z-50 no-print">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3">
@@ -442,7 +457,7 @@ const Index = () => {
 
       <main className="container mx-auto px-6 py-10 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar">
+          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar no-print">
             <DesignToolbar 
               design={currentDesign} 
               isExisting={isExistingInLibrary}
@@ -452,6 +467,7 @@ const Index = () => {
               onAddText={handleAddText}
               onSave={handleSaveToLibrary}
               onExportPNG={handleExportPNG}
+              onPrint={handlePrint}
             />
             <DecorationPicker 
               onAdd={handleAddDecoration} 
@@ -467,14 +483,14 @@ const Index = () => {
 
           <div className="lg:col-span-8 flex flex-col items-center justify-start pt-4 lg:sticky lg:top-24">
             <div className="w-full">
-              <div className="mb-6 flex items-center justify-between w-full max-w-[800px] mx-auto">
+              <div className="mb-6 flex items-center justify-between w-full max-w-[800px] mx-auto no-print">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">
                   {isPrintMode ? "Print Ready Mode Active" : (showGrid ? "Grid Snapping Active" : "Drag elements to position")}
                 </div>
               </div>
               
-              <div className="flex justify-center w-full">
+              <div id="sign-preview-wrapper" className="flex justify-center w-full">
                 <SignCanvas 
                   design={currentDesign} 
                   id="sign-preview" 
@@ -496,7 +512,9 @@ const Index = () => {
           </div>
         </div>
       </main>
-      <MadeWithDyad />
+      <div className="no-print">
+        <MadeWithDyad />
+      </div>
     </div>
   );
 };

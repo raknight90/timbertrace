@@ -99,3 +99,44 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+  }
+
+  .container {
+    max-width: none !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #sign-preview {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    box-shadow: none !important;
+    border: 1px solid #eee !important;
+  }
+
+  /* Hide the background wrapper of the canvas */
+  #sign-preview-wrapper {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+  }
+}

@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Trees, Check, Space, Download, Save, RefreshCw, Plus } from 'lucide-react';
+import { Type, Maximize2, Trees, Check, Space, Download, Save, RefreshCw, Plus, Printer } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -46,6 +46,7 @@ interface DesignToolbarProps {
   onAddText: () => void;
   onSave: () => void;
   onExportPNG: () => void;
+  onPrint: () => void;
 }
 
 const DesignToolbar = ({ 
@@ -56,7 +57,8 @@ const DesignToolbar = ({
   onUpdateText, 
   onAddText, 
   onSave, 
-  onExportPNG 
+  onExportPNG,
+  onPrint
 }: DesignToolbarProps) => {
   const selectedText = design.textElements.find(t => t.id === selectedId);
 
@@ -256,14 +258,24 @@ const DesignToolbar = ({
             </>
           )}
         </Button>
-        <Button 
-          onClick={onExportPNG}
-          variant="outline"
-          className="w-full border-amber-700 text-amber-200 hover:bg-amber-900/30 h-11"
-        >
-          <Download size={16} className="mr-2" />
-          Export PNG
-        </Button>
+        <div className="grid grid-cols-2 gap-3">
+          <Button 
+            onClick={onExportPNG}
+            variant="outline"
+            className="border-amber-700 text-amber-200 hover:bg-amber-900/30 h-11"
+          >
+            <Download size={16} className="mr-2" />
+            PNG
+          </Button>
+          <Button 
+            onClick={onPrint}
+            variant="outline"
+            className="border-amber-700 text-amber-200 hover:bg-amber-900/30 h-11"
+          >
+            <Printer size={16} className="mr-2" />
+            Print
+          </Button>
+        </div>
       </div>
     </div>
   );
