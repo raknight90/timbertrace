@@ -9,7 +9,12 @@ const WOOD_COLORS: Record<WoodMaterial, string> = {
   walnut: "#3d2b1f",
   oak: "#d2b48c",
   cherry: "#8b4513",
-  pine: "#f5deb3"
+  pine: "#f5deb3",
+  maple: "#f4e4bc",
+  mahogany: "#4a2511",
+  cedar: "#c17f59",
+  ebony: "#1a1a1a",
+  birch: "#fdf5e6"
 };
 
 interface SignCanvasProps {

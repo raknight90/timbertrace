@@ -22,6 +22,11 @@ const WOOD_TYPES: { name: string; value: WoodMaterial; color: string }[] = [
   { name: 'Oak', value: 'oak', color: '#d2b48c' },
   { name: 'Cherry', value: 'cherry', color: '#8b4513' },
   { name: 'Pine', value: 'pine', color: '#f5deb3' },
+  { name: 'Maple', value: 'maple', color: '#f4e4bc' },
+  { name: 'Mahogany', value: 'mahogany', color: '#4a2511' },
+  { name: 'Cedar', value: 'cedar', color: '#c17f59' },
+  { name: 'Ebony', value: 'ebony', color: '#1a1a1a' },
+  { name: 'Birch', value: 'birch', color: '#fdf5e6' },
 ];
 
 const COLORS = [
@@ -48,24 +53,25 @@ const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProp
           <Trees size={18} />
           <h3 className="font-semibold uppercase tracking-wider text-sm">Wood Type</h3>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           {WOOD_TYPES.map((wood) => (
             <button
               key={wood.value}
               onClick={() => onUpdate({ material: wood.value })}
-              className={`group relative h-12 rounded-lg border-2 transition-all flex items-center px-3 gap-3 ${
+              className={`group relative h-10 rounded-lg border transition-all flex items-center px-2 gap-2 ${
                 design.material === wood.value 
                   ? 'border-amber-500 bg-amber-500/10' 
                   : 'border-amber-900/30 bg-black/20 hover:border-amber-700'
               }`}
+              title={wood.name}
             >
               <div 
-                className="w-5 h-5 rounded-full border border-white/10 shadow-sm shrink-0" 
+                className="w-3 h-3 rounded-full border border-white/10 shadow-sm shrink-0" 
                 style={{ backgroundColor: wood.color }} 
               />
-              <span className="text-xs font-medium text-amber-100">{wood.name}</span>
+              <span className="text-[10px] font-medium text-amber-100 truncate">{wood.name}</span>
               {design.material === wood.value && (
-                <Check size={14} className="text-amber-400 ml-auto" />
+                <Check size={10} className="text-amber-400 ml-auto shrink-0" />
               )}
             </button>
           ))}

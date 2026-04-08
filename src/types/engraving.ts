@@ -11,7 +11,7 @@ export interface Decoration {
   flipY?: boolean;
 }
 
-export type WoodMaterial = 'walnut' | 'oak' | 'cherry' | 'pine';
+export type WoodMaterial = 'walnut' | 'oak' | 'cherry' | 'pine' | 'maple' | 'mahogany' | 'cedar' | 'ebony' | 'birch';
 
 export interface EngravingDesign {
   id: string;
