@@ -3,11 +3,11 @@
 import React from 'react';
 import { EngravingDesign, WoodMaterial } from '@/types/engraving';
 
-const MATERIAL_TEXTURES: Record<WoodMaterial, string> = {
-  walnut: "https://images.unsplash.com/photo-1622398925373-3f91b1e275f5?q=80&w=2074&auto=format&fit=crop",
-  oak: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?q=80&w=2070&auto=format&fit=crop",
-  cherry: "https://images.unsplash.com/photo-1531685250784-7569952593d2?q=80&w=1974&auto=format&fit=crop",
-  pine: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop"
+const WOOD_COLORS: Record<WoodMaterial, string> = {
+  walnut: "#3d2b1f",
+  oak: "#d2b48c",
+  cherry: "#8b4513",
+  pine: "#f5deb3"
 };
 
 interface SignCanvasProps {
@@ -26,9 +26,7 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
         aspectRatio: `${aspectRatio}`,
         width: '100%',
         maxWidth: '800px',
-        backgroundImage: `url("${MATERIAL_TEXTURES[design.material]}")`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundColor: WOOD_COLORS[design.material],
         // Physical board effect: Beveled edges and heavy shadow
         boxShadow: `
           0 20px 50px rgba(0,0,0,0.6),
@@ -55,15 +53,11 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
               fontSize: `${design.fontSize}px`,
               color: design.fontColor,
               // The "Carved" look:
-              // 1. Dark top shadow (the "hole" depth)
-              // 2. Light bottom highlight (the "edge" catching light)
-              // 3. Inner shadow simulation
               textShadow: `
                 0px -2px 1px rgba(0,0,0,0.9),
                 0px 1px 1px rgba(255,255,255,0.2),
                 0px 4px 8px rgba(0,0,0,0.4)
               `,
-              // Blend mode to let some grain show through if it's a dark color
               mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal',
               filter: 'contrast(1.1) brightness(0.85) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))'
             }}

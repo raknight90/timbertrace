@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Palette, Save, Download, Trees, Paintbrush, Check } from 'lucide-react';
+import { Type, Maximize2, Save, Download, Trees, Check } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -18,10 +18,10 @@ const FONTS = [
 ];
 
 const WOOD_TYPES: { name: string; value: WoodMaterial; color: string }[] = [
-  { name: 'American Walnut', value: 'walnut', color: '#3d2b1f' },
-  { name: 'White Oak', value: 'oak', color: '#d2b48c' },
-  { name: 'Black Cherry', value: 'cherry', color: '#8b4513' },
-  { name: 'Eastern Pine', value: 'pine', color: '#f5deb3' },
+  { name: 'Walnut', value: 'walnut', color: '#3d2b1f' },
+  { name: 'Oak', value: 'oak', color: '#d2b48c' },
+  { name: 'Cherry', value: 'cherry', color: '#8b4513' },
+  { name: 'Pine', value: 'pine', color: '#f5deb3' },
 ];
 
 const COLORS = [
@@ -49,24 +49,28 @@ const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProp
           <Trees size={18} />
           <h3 className="font-semibold uppercase tracking-wider text-sm">Wood Type</h3>
         </div>
-        <Select 
-          value={design.material} 
-          onValueChange={(val) => onUpdate({ material: val as WoodMaterial })}
-        >
-          <SelectTrigger className="bg-black/20 border-amber-900/50 h-12">
-            <SelectValue placeholder="Select Wood Type" />
-          </SelectTrigger>
-          <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
-            {WOOD_TYPES.map(wood => (
-              <SelectItem key={wood.value} value={wood.value}>
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-sm border border-white/10" style={{ backgroundColor: wood.color }} />
-                  {wood.name}
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="grid grid-cols-2 gap-3">
+          {WOOD_TYPES.map((wood) => (
+            <button
+              key={wood.value}
+              onClick={() => onUpdate({ material: wood.value })}
+              className={`group relative h-12 rounded-lg border-2 transition-all flex items-center px-3 gap-3 ${
+                design.material === wood.value 
+                  ? 'border-amber-500 bg-amber-500/10' 
+                  : 'border-amber-900/30 bg-black/20 hover:border-amber-700'
+              }`}
+            >
+              <div 
+                className="w-5 h-5 rounded-full border border-white/10 shadow-sm shrink-0" 
+                style={{ backgroundColor: wood.color }} 
+              />
+              <span className="text-xs font-medium text-amber-100">{wood.name}</span>
+              {design.material === wood.value && (
+                <Check size={14} className="text-amber-400 ml-auto" />
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Dimensions */}
@@ -179,14 +183,14 @@ const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProp
           onClick={onSave}
           className="bg-amber-700 hover:bg-amber-600 text-white border-none"
         >
-          <Save className="mr-2 h-4 w-4" /> Save to Library
+          Save to Library
         </Button>
         <Button 
           onClick={onExport}
           variant="outline"
           className="border-amber-700 text-amber-200 hover:bg-amber-900/30"
         >
-          <Download className="mr-2 h-4 w-4" /> Export PDF
+          Export PDF
         </Button>
       </div>
     </div>
