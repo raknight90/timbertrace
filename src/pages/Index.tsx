@@ -8,7 +8,7 @@ import DecorationPicker from '@/components/DecorationPicker';
 import DesignLibrary from '@/components/DesignLibrary';
 import { showSuccess, showError } from '@/utils/toast';
 import html2canvas from 'html2canvas';
-import { Hammer, Plus, Undo2, Redo2, Grid3X3 } from 'lucide-react';
+import { Hammer, Plus, Undo2, Redo2, Grid3X3, Printer } from 'lucide-react';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +41,7 @@ const Index = () => {
   const [library, setLibrary] = useState<EngravingDesign[]>([]);
   const [showGrid, setShowGrid] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
+  const [isPrintMode, setIsPrintMode] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Load library from local storage
@@ -341,7 +342,7 @@ const Index = () => {
         });
         
         const link = document.createElement('a');
-        link.download = `${currentDesign.name || 'wood-sign'}.png`;
+        link.download = `${currentDesign.name || 'wood-sign'}${isPrintMode ? '-print' : ''}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
         showSuccess("PNG exported successfully!");
@@ -354,8 +355,17 @@ const Index = () => {
 
   const handlePrint = () => {
     setSelectedId(null);
-    // Trigger native browser print dialog
-    window.print();
+    const wasPrintMode = isPrintMode;
+    setIsPrintMode(true);
+    
+    // Small delay to allow React to render the print-ready state
+    setTimeout(() => {
+      window.print();
+      // Restore previous mode after print dialog closes
+      if (!wasPrintMode) {
+        setIsPrintMode(false);
+      }
+    }, 100);
   };
 
   const isExistingInLibrary = library.some(d => d.id === currentDesign.id);
@@ -412,6 +422,15 @@ const Index = () => {
               >
                 <Grid3X3 size={16} />
               </Button>
+              <Button 
+                variant={isPrintMode ? "secondary" : "ghost"} 
+                size="icon" 
+                onClick={() => setIsPrintMode(!isPrintMode)}
+                className={`h-8 w-8 ${isPrintMode ? 'bg-amber-500/20 text-amber-400' : 'text-amber-200'}`}
+                title="Print Ready Mode"
+              >
+                <Printer size={16} />
+              </Button>
             </div>
           </div>
 
@@ -467,7 +486,7 @@ const Index = () => {
               <div className="mb-6 flex items-center justify-between w-full max-w-[800px] mx-auto no-print">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">
-                  {showGrid ? "Grid Snapping Active" : "Drag elements to position"}
+                  {isPrintMode ? "Print Ready Mode Active" : (showGrid ? "Grid Snapping Active" : "Drag elements to position")}
                 </div>
               </div>
               
@@ -477,6 +496,7 @@ const Index = () => {
                   id="sign-preview" 
                   showGrid={showGrid}
                   snapToGrid={snapToGrid}
+                  isPrintMode={isPrintMode}
                   selectedId={selectedId}
                   onSelect={setSelectedId}
                   onUpdateDesign={handleUpdateDesign}
