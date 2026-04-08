@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { EngravingDesign, Decoration, TextElement } from '@/types/engraving';
 import SignCanvas from '@/components/SignCanvas';
 import DesignToolbar from '@/components/DesignToolbar';
@@ -45,6 +45,7 @@ const Index = () => {
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
+  const editorRef = useRef<HTMLDivElement>(null);
 
   // Load library from local storage
   useEffect(() => {
@@ -63,6 +64,25 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem('wood-sign-library', JSON.stringify(library));
   }, [library]);
+
+  // Mouse Wheel Zoom Logic
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+        setZoom(prev => Math.min(3, Math.max(0.2, prev + delta)));
+      }
+    };
+
+    const el = editorRef.current;
+    if (el) {
+      el.addEventListener('wheel', handleWheel, { passive: false });
+    }
+    return () => {
+      if (el) el.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
 
   // History Management
   const addToHistory = useCallback((design: EngravingDesign) => {
@@ -518,11 +538,14 @@ const Index = () => {
           </div>
 
           <div className="lg:col-span-9 flex flex-col items-center justify-start pt-4 lg:sticky lg:top-24">
-            <div className="w-full overflow-auto custom-scrollbar max-h-[calc(100vh-12rem)] p-8 bg-black/10 rounded-2xl border border-amber-900/5">
+            <div 
+              ref={editorRef}
+              className="w-full overflow-auto custom-scrollbar max-h-[calc(100vh-12rem)] p-8 bg-black/10 rounded-2xl border border-amber-900/5"
+            >
               <div className="mb-6 flex items-center justify-between w-full max-w-[1000px] mx-auto no-print">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">
-                  {isPrintMode ? "Print Ready Mode Active" : (showGrid ? "Grid Snapping Active" : "Drag elements to position")}
+                  {isPrintMode ? "Print Ready Mode Active" : "Hold Ctrl + Scroll to Zoom"}
                 </div>
               </div>
               
