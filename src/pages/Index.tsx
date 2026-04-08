@@ -46,6 +46,12 @@ const Index = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const editorRef = useRef<HTMLDivElement>(null);
+  const zoomRef = useRef(zoom);
+
+  // Keep zoomRef in sync for the wheel event listener
+  useEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
 
   // Load library from local storage
   useEffect(() => {
@@ -65,13 +71,43 @@ const Index = () => {
     localStorage.setItem('wood-sign-library', JSON.stringify(library));
   }, [library]);
 
-  // Mouse Wheel Zoom Logic
+  // Mouse Wheel Zoom Logic (Zoom at Point)
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.05 : 0.05;
-        setZoom(prev => Math.min(3, Math.max(0.2, prev + delta)));
+        const container = editorRef.current;
+        if (!container) return;
+
+        const zoomStep = 0.1;
+        const delta = e.deltaY > 0 ? -zoomStep : zoomStep;
+        const oldZoom = zoomRef.current;
+        const newZoom = Math.min(5, Math.max(0.1, oldZoom + delta));
+
+        if (newZoom !== oldZoom) {
+          const rect = container.getBoundingClientRect();
+          
+          // Mouse position relative to the container
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+
+          // Calculate where the mouse is pointing in the "unscaled" coordinate space
+          // We subtract the scroll and divide by zoom
+          const contentX = (mouseX + container.scrollLeft) / oldZoom;
+          const contentY = (mouseY + container.scrollTop) / oldZoom;
+
+          setZoom(newZoom);
+
+          // Calculate new scroll positions to keep the content point under the mouse
+          const newScrollLeft = contentX * newZoom - mouseX;
+          const newScrollTop = contentY * newZoom - mouseY;
+
+          // Apply scroll adjustment in the next frame after the scale transform updates
+          requestAnimationFrame(() => {
+            container.scrollLeft = newScrollLeft;
+            container.scrollTop = newScrollTop;
+          });
+        }
       }
     };
 
@@ -460,7 +496,7 @@ const Index = () => {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  onClick={() => setZoom(Math.max(0.2, zoom - 0.1))}
+                  onClick={() => setZoom(Math.max(0.1, zoom - 0.1))}
                   className="h-7 w-7 text-amber-200"
                 >
                   <ZoomOut size={14} />
@@ -468,8 +504,8 @@ const Index = () => {
                 <div className="w-24 hidden sm:block">
                   <Slider 
                     value={[zoom]} 
-                    min={0.2} 
-                    max={3} 
+                    min={0.1} 
+                    max={5} 
                     step={0.1} 
                     onValueChange={([val]) => setZoom(val)}
                   />
@@ -477,7 +513,7 @@ const Index = () => {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  onClick={() => setZoom(Math.min(3, zoom + 0.1))}
+                  onClick={() => setZoom(Math.min(5, zoom + 0.1))}
                   className="h-7 w-7 text-amber-200"
                 >
                   <ZoomIn size={14} />
@@ -540,18 +576,18 @@ const Index = () => {
           <div className="lg:col-span-9 flex flex-col items-center justify-start pt-4 lg:sticky lg:top-24">
             <div 
               ref={editorRef}
-              className="w-full overflow-auto custom-scrollbar max-h-[calc(100vh-8rem)] p-4 sm:p-8 bg-black/10 rounded-2xl border border-amber-900/5"
+              className="w-full overflow-auto custom-scrollbar max-h-[calc(100vh-12rem)] p-8 bg-black/10 rounded-2xl border border-amber-900/5"
             >
-              <div className="mb-6 flex items-center justify-between w-full max-w-full mx-auto no-print">
+              <div className="mb-6 flex items-center justify-between w-full max-w-[1000px] mx-auto no-print">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">
-                  {isPrintMode ? "Print Ready Mode Active" : "Hold Ctrl + Scroll to Zoom"}
+                  {isPrintMode ? "Print Ready Mode Active" : "Hold Ctrl + Scroll to Zoom at Pointer"}
                 </div>
               </div>
               
               <div id="sign-preview-wrapper" className="flex justify-center w-full min-w-fit">
                 <div 
-                  className="transition-transform duration-200 ease-out origin-top" 
+                  className="transition-transform duration-200 ease-out origin-top-left" 
                   style={{ transform: `scale(${zoom})` }}
                 >
                   <SignCanvas 
