@@ -117,15 +117,12 @@ const Index = () => {
     <div 
       className="min-h-screen text-amber-50 font-sans selection:bg-amber-500/30 relative"
       style={{
-        backgroundColor: '#1a0f05',
-        backgroundImage: 'linear-gradient(rgba(26, 15, 5, 0.85), rgba(26, 15, 5, 0.95)), url("https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop")',
-        backgroundSize: 'cover',
-        backgroundAttachment: 'fixed',
-        backgroundPosition: 'center'
+        backgroundColor: '#0f0a05',
+        backgroundImage: 'radial-gradient(circle at center, rgba(42, 26, 10, 0.4) 0%, rgba(15, 10, 5, 1) 100%)',
       }}
     >
       {/* Header */}
-      <header className="border-b border-amber-900/30 bg-black/40 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-amber-900/30 bg-black/60 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-amber-700 p-2 rounded-lg shadow-lg shadow-amber-900/20">
@@ -188,7 +185,7 @@ const Index = () => {
         </div>
       </main>
 
-      <footer className="mt-20 border-t border-amber-900/20 py-10 bg-black/60 backdrop-blur-md">
+      <footer className="mt-20 border-t border-amber-900/20 py-10 bg-black/80 backdrop-blur-md">
         <div className="container mx-auto px-6 flex flex-col items-center gap-4">
           <div className="flex gap-8 text-amber-200/30 text-sm">
             <a href="#" className="hover:text-amber-200 transition-colors">Privacy</a>
