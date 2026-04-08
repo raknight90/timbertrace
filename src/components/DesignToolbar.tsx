@@ -1,13 +1,13 @@
 "use client";
 
 import React from 'react';
-import { EngravingDesign, WoodMaterial } from '@/types/engraving';
+import { EngravingDesign, WoodMaterial, TextElement } from '@/types/engraving';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Trees, Check, Space, Download, Save, RefreshCw } from 'lucide-react';
+import { Type, Maximize2, Trees, Check, Space, Download, Save, RefreshCw, Plus } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -40,12 +40,26 @@ const COLORS = [
 interface DesignToolbarProps {
   design: EngravingDesign;
   isExisting: boolean;
+  selectedId: string | null;
   onUpdate: (updates: Partial<EngravingDesign>) => void;
+  onUpdateText: (id: string, updates: Partial<TextElement>) => void;
+  onAddText: () => void;
   onSave: () => void;
   onExportPNG: () => void;
 }
 
-const DesignToolbar = ({ design, isExisting, onUpdate, onSave, onExportPNG }: DesignToolbarProps) => {
+const DesignToolbar = ({ 
+  design, 
+  isExisting, 
+  selectedId, 
+  onUpdate, 
+  onUpdateText, 
+  onAddText, 
+  onSave, 
+  onExportPNG 
+}: DesignToolbarProps) => {
+  const selectedText = design.textElements.find(t => t.id === selectedId);
+
   return (
     <div className="bg-[#2a1a0a]/90 backdrop-blur-md border border-amber-900/30 p-6 rounded-xl shadow-xl space-y-8 text-amber-50">
       {/* Wood Type Selection */}
@@ -111,94 +125,115 @@ const DesignToolbar = ({ design, isExisting, onUpdate, onSave, onExportPNG }: De
 
       {/* Text Content & Color */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2 text-amber-200">
-          <Type size={18} />
-          <h3 className="font-semibold uppercase tracking-wider text-sm">Engraving Text</h3>
+        <div className="flex items-center justify-between text-amber-200">
+          <div className="flex items-center gap-2">
+            <Type size={18} />
+            <h3 className="font-semibold uppercase tracking-wider text-sm">Text Elements</h3>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onAddText}
+            className="h-7 px-2 text-amber-400 hover:bg-amber-900/40"
+          >
+            <Plus size={14} className="mr-1" />
+            Add Block
+          </Button>
         </div>
-        <div className="space-y-4">
-          <Input 
-            placeholder="Enter text to engrave..."
-            value={design.text}
-            onChange={(e) => onUpdate({ text: e.target.value })}
-            className="bg-black/20 border-amber-900/50 focus:ring-amber-500 text-lg py-6"
-          />
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs text-amber-200/60">Font Style</Label>
-              <Select 
-                value={design.fontFamily} 
-                onValueChange={(val) => onUpdate({ fontFamily: val })}
-              >
-                <SelectTrigger className="bg-black/20 border-amber-900/50">
-                  <SelectValue placeholder="Select Font" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
-                  {FONTS.map(font => (
-                    <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
-                      {font.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs text-amber-200/60">Fill Color</Label>
-              <Select 
-                value={design.fontColor} 
-                onValueChange={(val) => onUpdate({ fontColor: val })}
-              >
-                <SelectTrigger className="bg-black/20 border-amber-900/50">
-                  <SelectValue placeholder="Select Color" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
-                  {COLORS.map(color => (
-                    <SelectItem key={color.value} value={color.value}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: color.value }} />
-                        {color.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        {selectedText ? (
+          <div className="space-y-4 p-4 bg-black/20 rounded-lg border border-amber-500/30">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] uppercase tracking-widest text-amber-500 font-bold">Editing Selected Text</span>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <Label className="text-xs text-amber-200/60">Font Size</Label>
-              <span className="text-xs text-amber-200/60">{design.fontSize}px</span>
-            </div>
-            <Slider 
-              value={[design.fontSize]} 
-              min={10} 
-              max={200} 
-              step={1}
-              onValueChange={([val]) => onUpdate({ fontSize: val })}
-              className="py-4"
+            <Input 
+              placeholder="Enter text to engrave..."
+              value={selectedText.text}
+              onChange={(e) => onUpdateText(selectedText.id, { text: e.target.value })}
+              className="bg-black/20 border-amber-900/50 focus:ring-amber-500 text-lg py-6"
             />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <div className="flex items-center gap-2">
-                <Space size={12} className="text-amber-200/60" />
-                <Label className="text-xs text-amber-200/60">Letter Spacing</Label>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-amber-200/60">Font Style</Label>
+                <Select 
+                  value={selectedText.fontFamily} 
+                  onValueChange={(val) => onUpdateText(selectedText.id, { fontFamily: val })}
+                >
+                  <SelectTrigger className="bg-black/20 border-amber-900/50">
+                    <SelectValue placeholder="Select Font" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
+                    {FONTS.map(font => (
+                      <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                        {font.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <span className="text-xs text-amber-200/60">{design.letterSpacing}px</span>
+
+              <div className="space-y-2">
+                <Label className="text-xs text-amber-200/60">Fill Color</Label>
+                <Select 
+                  value={selectedText.fontColor} 
+                  onValueChange={(val) => onUpdateText(selectedText.id, { fontColor: val })}
+                >
+                  <SelectTrigger className="bg-black/20 border-amber-900/50">
+                    <SelectValue placeholder="Select Color" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
+                    {COLORS.map(color => (
+                      <SelectItem key={color.value} value={color.value}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: color.value }} />
+                          {color.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <Slider 
-              value={[design.letterSpacing]} 
-              min={-10} 
-              max={50} 
-              step={1}
-              onValueChange={([val]) => onUpdate({ letterSpacing: val })}
-              className="py-4"
-            />
+
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <Label className="text-xs text-amber-200/60">Font Size</Label>
+                <span className="text-xs text-amber-200/60">{selectedText.fontSize}px</span>
+              </div>
+              <Slider 
+                value={[selectedText.fontSize]} 
+                min={10} 
+                max={200} 
+                step={1}
+                onValueChange={([val]) => onUpdateText(selectedText.id, { fontSize: val })}
+                className="py-4"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <div className="flex items-center gap-2">
+                  <Space size={12} className="text-amber-200/60" />
+                  <Label className="text-xs text-amber-200/60">Letter Spacing</Label>
+                </div>
+                <span className="text-xs text-amber-200/60">{selectedText.letterSpacing}px</span>
+              </div>
+              <Slider 
+                value={[selectedText.letterSpacing]} 
+                min={-10} 
+                max={50} 
+                step={1}
+                onValueChange={([val]) => onUpdateText(selectedText.id, { letterSpacing: val })}
+                className="py-4"
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="text-center py-6 px-4 bg-black/20 rounded-lg border border-dashed border-amber-900/30 text-amber-200/40 text-xs italic">
+            Select a text block on the sign to edit its properties
+          </div>
+        )}
       </div>
 
       {/* Actions */}

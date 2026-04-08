@@ -11,6 +11,16 @@ export interface Decoration {
   flipY?: boolean;
 }
 
+export interface TextElement {
+  id: string;
+  text: string;
+  fontFamily: string;
+  fontSize: number;
+  fontColor: string;
+  letterSpacing: number;
+  position: { x: number; y: number };
+}
+
 export type WoodMaterial = 'walnut' | 'oak' | 'cherry' | 'pine' | 'maple' | 'mahogany' | 'cedar' | 'ebony' | 'birch';
 
 export interface EngravingDesign {
@@ -18,14 +28,9 @@ export interface EngravingDesign {
   name: string;
   width: number;
   height: number;
-  text: string;
-  fontFamily: string;
-  fontSize: number;
-  fontColor: string;
-  letterSpacing: number;
   material: WoodMaterial;
+  textElements: TextElement[];
   decorations: Decoration[];
-  textPosition: { x: number; y: number };
   createdAt: number;
-  thumbnail?: string; // Base64 preview image
+  thumbnail?: string;
 }

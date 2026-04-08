@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { EngravingDesign, Decoration } from '@/types/engraving';
+import { EngravingDesign, Decoration, TextElement } from '@/types/engraving';
 import SignCanvas from '@/components/SignCanvas';
 import DesignToolbar from '@/components/DesignToolbar';
 import DecorationPicker from '@/components/DecorationPicker';
@@ -18,14 +18,19 @@ const DEFAULT_DESIGN: EngravingDesign = {
   name: 'New Design',
   width: 24,
   height: 12,
-  text: 'THE SMITHS',
-  fontFamily: "'Playfair Display', serif",
-  fontSize: 80,
-  fontColor: 'rgba(20, 10, 5, 0.9)',
-  letterSpacing: 0,
   material: 'walnut',
+  textElements: [
+    {
+      id: 'initial-text',
+      text: 'THE SMITHS',
+      fontFamily: "'Playfair Display', serif",
+      fontSize: 80,
+      fontColor: 'rgba(20, 10, 5, 0.9)',
+      letterSpacing: 0,
+      position: { x: 50, y: 50 },
+    }
+  ],
   decorations: [],
-  textPosition: { x: 50, y: 50 },
   createdAt: Date.now(),
 };
 
@@ -37,7 +42,7 @@ const Index = () => {
   const [showGrid, setShowGrid] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | 'text' | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Load library from local storage
   useEffect(() => {
@@ -106,9 +111,49 @@ const Index = () => {
   const handleUpdateDesign = (updates: Partial<EngravingDesign>) => {
     const updated = { ...currentDesign, ...updates };
     setCurrentDesign(updated);
-    if (!updates.textPosition) {
+    addToHistory(updated);
+  };
+
+  const handleAddText = () => {
+    const newText: TextElement = {
+      id: Math.random().toString(36).substr(2, 9),
+      text: 'New Text',
+      fontFamily: "'Playfair Display', serif",
+      fontSize: 40,
+      fontColor: 'rgba(20, 10, 5, 0.9)',
+      letterSpacing: 0,
+      position: { x: 50, y: 50 },
+    };
+    const updated = {
+      ...currentDesign,
+      textElements: [...currentDesign.textElements, newText]
+    };
+    setCurrentDesign(updated);
+    addToHistory(updated);
+    setSelectedId(newText.id);
+    showSuccess("Text block added!");
+  };
+
+  const handleUpdateText = (id: string, updates: Partial<TextElement>) => {
+    const updated = {
+      ...currentDesign,
+      textElements: currentDesign.textElements.map(t => t.id === id ? { ...t, ...updates } : t)
+    };
+    setCurrentDesign(updated);
+    if (!updates.position) {
       addToHistory(updated);
     }
+  };
+
+  const handleRemoveText = (id: string) => {
+    const updated = {
+      ...currentDesign,
+      textElements: currentDesign.textElements.filter(t => t.id !== id)
+    };
+    setCurrentDesign(updated);
+    addToHistory(updated);
+    setSelectedId(null);
+    showSuccess("Text block removed");
   };
 
   const handleAddDecoration = (content: string) => {
@@ -185,15 +230,29 @@ const Index = () => {
 
   const handleBringToFront = (id: string) => {
     const dec = currentDesign.decorations.find(d => d.id === id);
-    if (!dec) return;
-    const others = currentDesign.decorations.filter(d => d.id !== id);
-    const updated = {
-      ...currentDesign,
-      decorations: [...others, dec]
-    };
-    setCurrentDesign(updated);
-    addToHistory(updated);
-    showSuccess("Moved to front");
+    if (dec) {
+      const others = currentDesign.decorations.filter(d => d.id !== id);
+      const updated = {
+        ...currentDesign,
+        decorations: [...others, dec]
+      };
+      setCurrentDesign(updated);
+      addToHistory(updated);
+      showSuccess("Moved to front");
+      return;
+    }
+    
+    const textEl = currentDesign.textElements.find(t => t.id === id);
+    if (textEl) {
+      const others = currentDesign.textElements.filter(t => t.id !== id);
+      const updated = {
+        ...currentDesign,
+        textElements: [...others, textEl]
+      };
+      setCurrentDesign(updated);
+      addToHistory(updated);
+      showSuccess("Moved to front");
+    }
   };
 
   const handleRemoveDecoration = (id: string) => {
@@ -211,10 +270,8 @@ const Index = () => {
     const element = document.getElementById('sign-preview');
     if (!element) return;
 
-    // Deselect before saving thumbnail
     setSelectedId(null);
 
-    // Wait for render
     setTimeout(async () => {
       try {
         const canvas = await html2canvas(element, {
@@ -274,20 +331,18 @@ const Index = () => {
     const element = document.getElementById('sign-preview');
     if (!element) return;
 
-    // Deselect everything before export
     setSelectedId(null);
 
-    // Small delay to ensure React has rendered the deselected state
     setTimeout(async () => {
       try {
         const canvas = await html2canvas(element, {
-          scale: 3, // High quality
+          scale: 3,
           useCORS: true,
           backgroundColor: null,
         });
         
         const link = document.createElement('a');
-        link.download = `${currentDesign.name || currentDesign.text || 'wood-sign'}${isPrintMode ? '-print' : ''}.png`;
+        link.download = `${currentDesign.name || 'wood-sign'}${isPrintMode ? '-print' : ''}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
         showSuccess("PNG exported successfully!");
@@ -391,14 +446,17 @@ const Index = () => {
             <DesignToolbar 
               design={currentDesign} 
               isExisting={isExistingInLibrary}
+              selectedId={selectedId}
               onUpdate={handleUpdateDesign}
+              onUpdateText={handleUpdateText}
+              onAddText={handleAddText}
               onSave={handleSaveToLibrary}
               onExportPNG={handleExportPNG}
             />
             <DecorationPicker 
               onAdd={handleAddDecoration} 
               onAddImage={handleAddImageDecoration}
-              selectedColor={currentDesign.fontColor}
+              selectedColor={currentDesign.textElements[0]?.fontColor}
             />
             <DesignLibrary 
               designs={library} 
@@ -426,7 +484,9 @@ const Index = () => {
                   selectedId={selectedId}
                   onSelect={setSelectedId}
                   onUpdateDesign={handleUpdateDesign}
+                  onUpdateText={handleUpdateText}
                   onUpdateDecoration={handleUpdateDecoration}
+                  onRemoveText={handleRemoveText}
                   onRemoveDecoration={handleRemoveDecoration}
                   onDuplicateDecoration={handleDuplicateDecoration}
                   onBringToFront={handleBringToFront}

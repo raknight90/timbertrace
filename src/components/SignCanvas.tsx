@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { EngravingDesign, WoodMaterial, Decoration } from '@/types/engraving';
+import { EngravingDesign, WoodMaterial, Decoration, TextElement } from '@/types/engraving';
 import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter, RotateCw, FlipHorizontal, FlipVertical, Layers } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
@@ -23,10 +23,12 @@ interface SignCanvasProps {
   showGrid?: boolean;
   snapToGrid?: boolean;
   isPrintMode?: boolean;
-  selectedId: string | 'text' | null;
-  onSelect: (id: string | 'text' | null) => void;
+  selectedId: string | null;
+  onSelect: (id: string | null) => void;
   onUpdateDesign?: (updates: Partial<EngravingDesign>) => void;
+  onUpdateText?: (id: string, updates: Partial<TextElement>) => void;
   onUpdateDecoration?: (id: string, updates: Partial<Decoration>) => void;
+  onRemoveText?: (id: string) => void;
   onRemoveDecoration?: (id: string) => void;
   onDuplicateDecoration?: (id: string) => void;
   onBringToFront?: (id: string) => void;
@@ -41,7 +43,9 @@ const SignCanvas = ({
   selectedId,
   onSelect,
   onUpdateDesign, 
+  onUpdateText,
   onUpdateDecoration, 
+  onRemoveText,
   onRemoveDecoration,
   onDuplicateDecoration,
   onBringToFront
@@ -62,7 +66,7 @@ const SignCanvas = ({
     displayHeight *= scale;
   }
 
-  const handleMouseDown = (e: React.MouseEvent, targetId: string | 'text') => {
+  const handleMouseDown = (e: React.MouseEvent, targetId: string) => {
     e.stopPropagation();
     onSelect(targetId);
     setIsDragging(true);
@@ -92,8 +96,9 @@ const SignCanvas = ({
     const constrainedX = Math.max(0, Math.min(100, x));
     const constrainedY = Math.max(0, Math.min(100, y));
 
-    if (selectedId === 'text') {
-      onUpdateDesign?.({ textPosition: { x: constrainedX, y: constrainedY } });
+    const isText = design.textElements.some(t => t.id === selectedId);
+    if (isText) {
+      onUpdateText?.(selectedId, { position: { x: constrainedX, y: constrainedY } });
     } else {
       onUpdateDecoration?.(selectedId, { position: { x: constrainedX, y: constrainedY } });
     }
@@ -120,20 +125,24 @@ const SignCanvas = ({
         case 'ArrowDown': dy = step; break;
         case 'Delete':
         case 'Backspace':
-          if (selectedId !== 'text') {
+          const isText = design.textElements.some(t => t.id === selectedId);
+          if (isText) {
+            onRemoveText?.(selectedId);
+          } else {
             onRemoveDecoration?.(selectedId);
-            onSelect(null);
           }
+          onSelect(null);
           return;
         default: return;
       }
 
       e.preventDefault();
 
-      if (selectedId === 'text') {
-        const newX = Math.max(0, Math.min(100, design.textPosition.x + dx));
-        const newY = Math.max(0, Math.min(100, design.textPosition.y + dy));
-        onUpdateDesign?.({ textPosition: { x: newX, y: newY } });
+      const textEl = design.textElements.find(t => t.id === selectedId);
+      if (textEl) {
+        const newX = Math.max(0, Math.min(100, textEl.position.x + dx));
+        const newY = Math.max(0, Math.min(100, textEl.position.y + dy));
+        onUpdateText?.(selectedId, { position: { x: newX, y: newY } });
       } else {
         const dec = design.decorations.find(d => d.id === selectedId);
         if (dec) {
@@ -146,7 +155,7 @@ const SignCanvas = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, design, onUpdateDesign, onUpdateDecoration, onRemoveDecoration, onSelect]);
+  }, [selectedId, design, onUpdateDesign, onUpdateText, onUpdateDecoration, onRemoveText, onRemoveDecoration, onSelect]);
 
   useEffect(() => {
     if (isDragging) {
@@ -155,19 +164,19 @@ const SignCanvas = ({
     }
   }, [isDragging]);
 
-  const engravingStyle = isPrintMode ? {
+  const getEngravingStyle = (color: string) => isPrintMode ? {
     color: '#000000',
     textShadow: 'none',
     filter: 'none',
     mixBlendMode: 'normal' as any
   } : {
-    color: design.fontColor,
+    color: color,
     textShadow: `
       -1px -1px 1px rgba(0,0,0,0.6), 
       1px 1px 1px rgba(255,255,255,0.1),
       0px 1px 2px rgba(0,0,0,0.8)
     `,
-    mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal' as any,
+    mixBlendMode: color.startsWith('rgba') ? 'multiply' : 'normal' as any,
     filter: 'contrast(1.2) brightness(0.85) drop-shadow(0px 1px 0px rgba(255,255,255,0.05))'
   };
 
@@ -188,7 +197,6 @@ const SignCanvas = ({
       >
         {/* Wood Sign Container */}
         <div className={`absolute inset-0 overflow-hidden rounded-sm shadow-2xl border ${isPrintMode ? 'border-gray-200' : 'border-black/40'}`}>
-          {/* Base Wood Color / Print Mode White */}
           <div 
             className="absolute inset-0 transition-colors duration-300"
             style={{ backgroundColor: isPrintMode ? '#FFFFFF' : WOOD_COLORS[design.material] }}
@@ -196,22 +204,14 @@ const SignCanvas = ({
           
           {!isPrintMode && (
             <>
-              {/* Wood Grain Texture */}
               <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
-              
-              {/* Chaffed/Beveled Edge Effect */}
               <div className="absolute inset-0 pointer-events-none rounded-sm shadow-[inset_0_0_15px_rgba(0,0,0,0.7),inset_0_0_2px_rgba(0,0,0,0.9)]" />
-              
-              {/* Worn Edge Highlight (Sanded Look) */}
               <div className="absolute inset-0 pointer-events-none rounded-sm border border-white/10 mix-blend-screen opacity-20" />
-              
-              {/* Lighting/Depth Overlays */}
               <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/20 pointer-events-none" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,transparent_70%)] pointer-events-none" />
             </>
           )}
           
-          {/* Grid Overlay */}
           {showGrid && (
             <div 
               className={`absolute inset-0 pointer-events-none ${isPrintMode ? 'opacity-10' : 'opacity-20'}`}
@@ -225,7 +225,6 @@ const SignCanvas = ({
             />
           )}
           
-          {/* Center Lines */}
           {showGrid && (
             <>
               <div className={`absolute left-1/2 top-0 bottom-0 w-[1px] ${isPrintMode ? 'bg-black/20' : 'bg-amber-500/30'} pointer-events-none`} />
@@ -234,66 +233,67 @@ const SignCanvas = ({
           )}
         </div>
 
-        {/* Main Text Layer */}
-        <div 
-          className={`absolute cursor-move transition-shadow ${selectedId === 'text' ? 'z-50' : 'z-10'}`}
-          style={{
-            left: `${design.textPosition.x}%`,
-            top: `${design.textPosition.y}%`,
-            transform: `translate(-50%, -50%)`,
-          }}
-          onMouseDown={(e) => handleMouseDown(e, 'text')}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div 
-            className={`relative group/text p-4 rounded-lg border-2 transition-all ${selectedId === 'text' ? 'border-amber-500 bg-amber-500/10' : 'border-transparent hover:border-amber-500/30'}`}
-          >
-            <h2 
-              style={{ 
-                ...engravingStyle,
-                fontFamily: design.fontFamily, 
-                fontSize: `${design.fontSize}px`,
-                letterSpacing: `${design.letterSpacing}px`,
+        {/* Text Elements Layer */}
+        {design.textElements.map((textEl) => {
+          const isSelected = selectedId === textEl.id;
+          return (
+            <div 
+              key={textEl.id}
+              className={`absolute cursor-move transition-shadow ${isSelected ? 'z-50' : 'z-10'}`}
+              style={{
+                left: `${textEl.position.x}%`,
+                top: `${textEl.position.y}%`,
+                transform: `translate(-50%, -50%)`,
               }}
-              className="text-center leading-tight select-none font-bold tracking-tight whitespace-nowrap"
+              onMouseDown={(e) => handleMouseDown(e, textEl.id)}
+              onClick={(e) => e.stopPropagation()}
             >
-              {design.text || "Your Text Here"}
-            </h2>
+              <div 
+                className={`relative group/text p-4 rounded-lg border-2 transition-all ${isSelected ? 'border-amber-500 bg-amber-500/10' : 'border-transparent hover:border-amber-500/30'}`}
+              >
+                <h2 
+                  style={{ 
+                    ...getEngravingStyle(textEl.fontColor),
+                    fontFamily: textEl.fontFamily, 
+                    fontSize: `${textEl.fontSize}px`,
+                    letterSpacing: `${textEl.letterSpacing}px`,
+                  }}
+                  className="text-center leading-tight select-none font-bold tracking-tight whitespace-nowrap"
+                >
+                  {textEl.text || "Your Text Here"}
+                </h2>
 
-            {selectedId === 'text' && (
-              <div className={`absolute ${design.textPosition.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
-                <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
-                  <Maximize size={12} className="text-amber-200/60" />
-                  <div className="w-24">
-                    <Slider 
-                      value={[design.fontSize]} 
-                      min={10} 
-                      max={200} 
-                      step={1}
-                      onValueChange={([val]) => onUpdateDesign?.({ fontSize: val })}
-                    />
+                {isSelected && (
+                  <div className={`absolute ${textEl.position.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
+                    <div className="flex items-center gap-1 px-1 border-r border-amber-900/30">
+                      <button 
+                        onClick={() => onUpdateText?.(textEl.id, { position: { ...textEl.position, x: 50 } })}
+                        className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
+                        title="Center Horizontally"
+                      >
+                        <AlignCenter size={14} />
+                      </button>
+                      <button 
+                        onClick={() => onUpdateText?.(textEl.id, { position: { ...textEl.position, y: 50 } })}
+                        className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
+                        title="Center Vertically"
+                      >
+                        <AlignVerticalJustifyCenter size={14} />
+                      </button>
+                    </div>
+                    <button 
+                      onClick={() => onRemoveText?.(textEl.id)}
+                      className="p-1.5 hover:bg-red-900/40 rounded-full text-red-400 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
-                </div>
-                <div className="flex items-center gap-1 px-1">
-                  <button 
-                    onClick={() => onUpdateDesign?.({ textPosition: { ...design.textPosition, x: 50 } })}
-                    className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
-                    title="Center Horizontally"
-                  >
-                    <AlignCenter size={14} />
-                  </button>
-                  <button 
-                    onClick={() => onUpdateDesign?.({ textPosition: { ...design.textPosition, y: 50 } })}
-                    className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
-                    title="Center Vertically"
-                  >
-                    <AlignVerticalJustifyCenter size={14} />
-                  </button>
-                </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          );
+        })}
 
         {/* Decorations Layer */}
         {design.decorations.map((dec) => {
@@ -329,7 +329,7 @@ const SignCanvas = ({
                   <span 
                     className="text-5xl select-none block"
                     style={{
-                      ...engravingStyle,
+                      ...getEngravingStyle(design.textElements[0]?.fontColor || '#1a1a1a'),
                       transform: `scale(${dec.scale})`,
                     }}
                   >
