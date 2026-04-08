@@ -27,7 +27,6 @@ const DECORATIONS = [
   // Borders & Lines
   { id: 'border-1', content: '◈', name: 'Diamond' },
   { id: 'border-2', content: '❖', name: 'Fancy Diamond' },
-  { id: 'border-3', content: '✥', name: 'Cross' },
   { id: 'border-4', content: '═', name: 'Double Line' },
   { id: 'border-5', content: '🙤', name: 'Ornate Line' },
   { id: 'border-6', content: '🙥', name: 'Fancy Line' },
