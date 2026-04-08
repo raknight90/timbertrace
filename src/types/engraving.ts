@@ -22,6 +22,7 @@ export interface EngravingDesign {
   fontFamily: string;
   fontSize: number;
   fontColor: string;
+  letterSpacing: number;
   material: WoodMaterial;
   decorations: Decoration[];
   textPosition: { x: number; y: number };

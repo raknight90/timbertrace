@@ -182,6 +182,7 @@ const SignCanvas = ({
                 ...engravingStyle,
                 fontFamily: design.fontFamily, 
                 fontSize: `${design.fontSize}px`,
+                letterSpacing: `${design.letterSpacing}px`,
               }}
               className="text-center leading-tight select-none font-bold tracking-tight whitespace-nowrap"
             >

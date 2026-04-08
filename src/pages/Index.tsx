@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EngravingDesign, Decoration } from '@/types/engraving';
 import SignCanvas from '@/components/SignCanvas';
 import DesignToolbar from '@/components/DesignToolbar';
@@ -9,9 +9,10 @@ import DesignLibrary from '@/components/DesignLibrary';
 import { showSuccess, showError } from '@/utils/toast';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { Hammer, Plus } from 'lucide-react';
+import { Hammer, Plus, Undo2, Redo2 } from 'lucide-react';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const DEFAULT_DESIGN: EngravingDesign = {
   id: '1',
@@ -22,6 +23,7 @@ const DEFAULT_DESIGN: EngravingDesign = {
   fontFamily: "'Playfair Display', serif",
   fontSize: 80,
   fontColor: 'rgba(20, 10, 5, 0.9)',
+  letterSpacing: 0,
   material: 'walnut',
   decorations: [],
   textPosition: { x: 50, y: 50 },
@@ -31,44 +33,80 @@ const DEFAULT_DESIGN: EngravingDesign = {
 
 const Index = () => {
   const [currentDesign, setCurrentDesign] = useState<EngravingDesign>(DEFAULT_DESIGN);
+  const [history, setHistory] = useState<EngravingDesign[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const [library, setLibrary] = useState<EngravingDesign[]>([]);
 
+  // Load library from local storage
   useEffect(() => {
     const saved = localStorage.getItem('wood-sign-library');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        const migrated = parsed.map((d: any) => ({
-          ...d,
-          textPosition: d.textPosition || { x: 50, y: 50 },
-          textRotation: d.textRotation || 0,
-          decorations: (d.decorations || []).map((dec: any) => ({
-            ...dec,
-            rotation: dec.rotation || 0
-          }))
-        }));
-        setLibrary(migrated);
+        setLibrary(parsed);
       } catch (e) {
         console.error("Failed to load library", e);
       }
     }
   }, []);
 
+  // Save library to local storage
   useEffect(() => {
     localStorage.setItem('wood-sign-library', JSON.stringify(library));
   }, [library]);
 
+  // History Management
+  const addToHistory = useCallback((design: EngravingDesign) => {
+    setHistory(prev => {
+      const newHistory = prev.slice(0, historyIndex + 1);
+      return [...newHistory, JSON.parse(JSON.stringify(design))].slice(-50); // Keep last 50 steps
+    });
+    setHistoryIndex(prev => prev + 1);
+  }, [historyIndex]);
+
+  const undo = () => {
+    if (historyIndex > 0) {
+      const prevIndex = historyIndex - 1;
+      setHistoryIndex(prevIndex);
+      setCurrentDesign(JSON.parse(JSON.stringify(history[prevIndex])));
+    }
+  };
+
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+      const nextIndex = historyIndex + 1;
+      setHistoryIndex(nextIndex);
+      setCurrentDesign(JSON.parse(JSON.stringify(history[nextIndex])));
+    }
+  };
+
+  // Initialize history
+  useEffect(() => {
+    if (history.length === 0) {
+      setHistory([JSON.parse(JSON.stringify(DEFAULT_DESIGN))]);
+      setHistoryIndex(0);
+    }
+  }, []);
+
   const handleNewDesign = () => {
-    setCurrentDesign({
+    const newDesign = {
       ...DEFAULT_DESIGN,
       id: Math.random().toString(36).substr(2, 9),
       createdAt: Date.now()
-    });
+    };
+    setCurrentDesign(newDesign);
+    addToHistory(newDesign);
     showSuccess("Started a new design");
   };
 
   const handleUpdateDesign = (updates: Partial<EngravingDesign>) => {
-    setCurrentDesign(prev => ({ ...prev, ...updates }));
+    const updated = { ...currentDesign, ...updates };
+    setCurrentDesign(updated);
+    // Only add to history for significant changes (not every drag frame)
+    // For simplicity here, we'll add it, but in a real app we might debounce
+    if (!updates.textPosition) {
+      addToHistory(updated);
+    }
   };
 
   const handleAddDecoration = (content: string) => {
@@ -81,10 +119,12 @@ const Index = () => {
       scale: 1,
       rotation: 0,
     };
-    setCurrentDesign(prev => ({
-      ...prev,
-      decorations: [...prev.decorations, newDec]
-    }));
+    const updated = {
+      ...currentDesign,
+      decorations: [...currentDesign.decorations, newDec]
+    };
+    setCurrentDesign(updated);
+    addToHistory(updated);
     showSuccess("Decoration added!");
   };
 
@@ -99,10 +139,12 @@ const Index = () => {
       scale: 1,
       rotation: 0,
     };
-    setCurrentDesign(prev => ({
-      ...prev,
-      decorations: [...prev.decorations, newDec]
-    }));
+    const updated = {
+      ...currentDesign,
+      decorations: [...currentDesign.decorations, newDec]
+    };
+    setCurrentDesign(updated);
+    addToHistory(updated);
     showSuccess("Image added!");
   };
 
@@ -116,38 +158,46 @@ const Index = () => {
       position: { x: decToDup.position.x + 5, y: decToDup.position.y + 5 }
     };
 
-    setCurrentDesign(prev => ({
-      ...prev,
-      decorations: [...prev.decorations, newDec]
-    }));
+    const updated = {
+      ...currentDesign,
+      decorations: [...currentDesign.decorations, newDec]
+    };
+    setCurrentDesign(updated);
+    addToHistory(updated);
     showSuccess("Decoration duplicated!");
   };
 
   const handleUpdateDecoration = (id: string, updates: Partial<Decoration>) => {
-    setCurrentDesign(prev => ({
-      ...prev,
-      decorations: prev.decorations.map(d => d.id === id ? { ...d, ...updates } : d)
-    }));
+    const updated = {
+      ...currentDesign,
+      decorations: currentDesign.decorations.map(d => d.id === id ? { ...d, ...updates } : d)
+    };
+    setCurrentDesign(updated);
+    if (!updates.position) {
+      addToHistory(updated);
+    }
   };
 
   const handleBringToFront = (id: string) => {
-    setCurrentDesign(prev => {
-      const dec = prev.decorations.find(d => d.id === id);
-      if (!dec) return prev;
-      const others = prev.decorations.filter(d => d.id !== id);
-      return {
-        ...prev,
-        decorations: [...others, dec]
-      };
-    });
+    const dec = currentDesign.decorations.find(d => d.id === id);
+    if (!dec) return;
+    const others = currentDesign.decorations.filter(d => d.id !== id);
+    const updated = {
+      ...currentDesign,
+      decorations: [...others, dec]
+    };
+    setCurrentDesign(updated);
+    addToHistory(updated);
     showSuccess("Moved to front");
   };
 
   const handleRemoveDecoration = (id: string) => {
-    setCurrentDesign(prev => ({
-      ...prev,
-      decorations: prev.decorations.filter(d => d.id !== id)
-    }));
+    const updated = {
+      ...currentDesign,
+      decorations: currentDesign.decorations.filter(d => d.id !== id)
+    };
+    setCurrentDesign(updated);
+    addToHistory(updated);
     showSuccess("Decoration removed");
   };
 
@@ -163,6 +213,8 @@ const Index = () => {
 
   const handleLoadDesign = (design: EngravingDesign) => {
     setCurrentDesign(design);
+    setHistory([JSON.parse(JSON.stringify(design))]);
+    setHistoryIndex(0);
     showSuccess("Design loaded!");
   };
 
@@ -190,7 +242,7 @@ const Index = () => {
       });
 
       pdf.addImage(imgData, 'PNG', 0, 0, currentDesign.width, currentDesign.height);
-      pdf.save(`${currentDesign.text || 'wood-sign'}-template.pdf`);
+      pdf.save(`${currentDesign.name || currentDesign.text || 'wood-sign'}-template.pdf`);
       showSuccess("PDF exported successfully!");
     } catch (err) {
       showError("Failed to export PDF");
@@ -208,23 +260,57 @@ const Index = () => {
     >
       <header className="border-b border-amber-900/30 bg-black/60 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-amber-700 p-2 rounded-lg shadow-lg shadow-amber-900/20">
-              <Hammer className="text-white" size={24} />
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-amber-700 p-2 rounded-lg shadow-lg shadow-amber-900/20">
+                <Hammer className="text-white" size={24} />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-xl font-bold tracking-tight text-amber-100">TimberTrace</h1>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-amber-500/60 font-semibold">Engraving Studio</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-amber-100">TimberTrace</h1>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-amber-500/60 font-semibold">Engraving Template Studio</p>
+
+            <div className="flex items-center gap-2 bg-black/40 p-1 rounded-lg border border-amber-900/20">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={undo} 
+                disabled={historyIndex <= 0}
+                className="h-8 w-8 text-amber-200 disabled:opacity-30"
+              >
+                <Undo2 size={16} />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={redo} 
+                disabled={historyIndex >= history.length - 1}
+                className="h-8 w-8 text-amber-200 disabled:opacity-30"
+              >
+                <Redo2 size={16} />
+              </Button>
             </div>
           </div>
-          <Button 
-            onClick={handleNewDesign}
-            variant="ghost"
-            className="text-amber-200 hover:bg-amber-900/40 hover:text-amber-100"
-          >
-            <Plus size={18} className="mr-2" />
-            New Design
-          </Button>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden md:block">
+              <Input 
+                value={currentDesign.name}
+                onChange={(e) => handleUpdateDesign({ name: e.target.value })}
+                className="bg-black/40 border-amber-900/30 text-amber-100 h-9 w-48 focus:ring-amber-500"
+                placeholder="Project Name"
+              />
+            </div>
+            <Button 
+              onClick={handleNewDesign}
+              variant="ghost"
+              className="text-amber-200 hover:bg-amber-900/40 hover:text-amber-100"
+            >
+              <Plus size={18} className="mr-2" />
+              New
+            </Button>
+          </div>
         </div>
       </header>
 

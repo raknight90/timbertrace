@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Save, Download, Trees, Check } from 'lucide-react';
+import { Type, Maximize2, Trees, Check, Space } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -170,6 +170,24 @@ const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProp
               max={200} 
               step={1}
               onValueChange={([val]) => onUpdate({ fontSize: val })}
+              className="py-4"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <div className="flex items-center gap-2">
+                <Space size={12} className="text-amber-200/60" />
+                <Label className="text-xs text-amber-200/60">Letter Spacing</Label>
+              </div>
+              <span className="text-xs text-amber-200/60">{design.letterSpacing}px</span>
+            </div>
+            <Slider 
+              value={[design.letterSpacing]} 
+              min={-10} 
+              max={50} 
+              step={1}
+              onValueChange={([val]) => onUpdate({ letterSpacing: val })}
               className="py-4"
             />
           </div>
