@@ -113,9 +113,18 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a0f05] text-amber-50 font-sans selection:bg-amber-500/30">
+    <div 
+      className="min-h-screen text-amber-50 font-sans selection:bg-amber-500/30 relative"
+      style={{
+        backgroundColor: '#1a0f05',
+        backgroundImage: 'linear-gradient(rgba(26, 15, 5, 0.85), rgba(26, 15, 5, 0.95)), url("https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop")',
+        backgroundSize: 'cover',
+        backgroundAttachment: 'fixed',
+        backgroundPosition: 'center'
+      }}
+    >
       {/* Header */}
-      <header className="border-b border-amber-900/30 bg-black/20 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-amber-900/30 bg-black/40 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-amber-700 p-2 rounded-lg shadow-lg shadow-amber-900/20">
@@ -132,7 +141,7 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-10">
+      <main className="container mx-auto px-6 py-10 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
           {/* Left Column: Controls */}
@@ -166,7 +175,7 @@ const Index = () => {
                 <SignCanvas design={currentDesign} id="sign-preview" />
               </div>
 
-              <div className="mt-12 p-6 rounded-xl bg-amber-900/10 border border-amber-900/20 max-w-[800px] w-full">
+              <div className="mt-12 p-6 rounded-xl bg-black/40 backdrop-blur-sm border border-amber-900/20 max-w-[800px] w-full">
                 <h3 className="text-sm font-semibold text-amber-200 mb-2 uppercase tracking-wider">Pro Tip</h3>
                 <p className="text-sm text-amber-200/60 leading-relaxed">
                   When exporting for CNC or laser engraving, ensure your font size is large enough for the bit or beam width. 
@@ -178,7 +187,7 @@ const Index = () => {
         </div>
       </main>
 
-      <footer className="mt-20 border-t border-amber-900/20 py-10 bg-black/40">
+      <footer className="mt-20 border-t border-amber-900/20 py-10 bg-black/60 backdrop-blur-md">
         <div className="container mx-auto px-6 flex flex-col items-center gap-4">
           <div className="flex gap-8 text-amber-200/30 text-sm">
             <a href="#" className="hover:text-amber-200 transition-colors">Privacy</a>
