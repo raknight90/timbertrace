@@ -97,7 +97,8 @@ const Index = () => {
       createdAt: Date.now()
     };
     setCurrentDesign(newDesign);
-    addToHistory(newDesign);
+    setHistory([JSON.parse(JSON.stringify(newDesign))]);
+    setHistoryIndex(0);
     showSuccess("Started a new design");
   };
 
@@ -206,7 +207,6 @@ const Index = () => {
     if (!element) return;
 
     try {
-      // Generate thumbnail
       const canvas = await html2canvas(element, {
         scale: 0.5,
         useCORS: true,
@@ -224,7 +224,6 @@ const Index = () => {
       showSuccess("Design saved to library!");
     } catch (err) {
       console.error("Thumbnail generation failed", err);
-      // Save anyway without thumbnail
       const newDesign = {
         ...currentDesign,
         id: Math.random().toString(36).substr(2, 9),
@@ -270,6 +269,28 @@ const Index = () => {
       showSuccess("PDF exported successfully!");
     } catch (err) {
       showError("Failed to export PDF");
+      console.error(err);
+    }
+  };
+
+  const handleExportPNG = async () => {
+    const element = document.getElementById('sign-preview');
+    if (!element) return;
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 3, // High quality
+        useCORS: true,
+        backgroundColor: null,
+      });
+      
+      const link = document.createElement('a');
+      link.download = `${currentDesign.name || currentDesign.text || 'wood-sign'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showSuccess("PNG exported successfully!");
+    } catch (err) {
+      showError("Failed to export PNG");
       console.error(err);
     }
   };
@@ -358,6 +379,7 @@ const Index = () => {
               onUpdate={handleUpdateDesign}
               onSave={handleSaveToLibrary}
               onExport={handleExportPDF}
+              onExportPNG={handleExportPNG}
             />
             <DecorationPicker 
               onAdd={handleAddDecoration} 

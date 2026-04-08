@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Trees, Check, Space } from 'lucide-react';
+import { Type, Maximize2, Trees, Check, Space, Download, FileJson, Save } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -42,9 +42,10 @@ interface DesignToolbarProps {
   onUpdate: (updates: Partial<EngravingDesign>) => void;
   onSave: () => void;
   onExport: () => void;
+  onExportPNG: () => void;
 }
 
-const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProps) => {
+const DesignToolbar = ({ design, onUpdate, onSave, onExport, onExportPNG }: DesignToolbarProps) => {
   return (
     <div className="bg-[#2a1a0a]/90 backdrop-blur-md border border-amber-900/30 p-6 rounded-xl shadow-xl space-y-8 text-amber-50">
       {/* Wood Type Selection */}
@@ -201,20 +202,32 @@ const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProp
       </div>
 
       {/* Actions */}
-      <div className="pt-4 grid grid-cols-2 gap-3">
+      <div className="pt-4 space-y-3">
         <Button 
           onClick={onSave}
-          className="bg-amber-700 hover:bg-amber-600 text-white border-none"
+          className="w-full bg-amber-700 hover:bg-amber-600 text-white border-none h-11"
         >
+          <Save size={18} className="mr-2" />
           Save to Library
         </Button>
-        <Button 
-          onClick={onExport}
-          variant="outline"
-          className="border-amber-700 text-amber-200 hover:bg-amber-900/30"
-        >
-          Export PDF
-        </Button>
+        <div className="grid grid-cols-2 gap-3">
+          <Button 
+            onClick={onExportPNG}
+            variant="outline"
+            className="border-amber-700 text-amber-200 hover:bg-amber-900/30"
+          >
+            <Download size={16} className="mr-2" />
+            PNG
+          </Button>
+          <Button 
+            onClick={onExport}
+            variant="outline"
+            className="border-amber-700 text-amber-200 hover:bg-amber-900/30"
+          >
+            <FileJson size={16} className="mr-2" />
+            PDF
+          </Button>
+        </div>
       </div>
     </div>
   );
