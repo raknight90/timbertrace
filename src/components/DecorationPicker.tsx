@@ -5,49 +5,51 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Palette, Upload, Image as ImageIcon } from 'lucide-react';
 
+// Appending \uFE0E forces the browser to render the character as text rather than a colorful emoji
 const DECORATIONS = [
   // Flourishes & Symbols (Monochrome)
-  { id: 'flourish-1', content: '⚜', name: 'Fleur-de-lis' },
-  { id: 'flourish-2', content: '❦', name: 'Floral Heart' },
-  { id: 'flourish-3', content: '❧', name: 'Vine' },
-  { id: 'symbol-1', content: '❀', name: 'Flower' },
-  { id: 'symbol-2', content: '❁', name: 'Ornate Flower' },
-  { id: 'symbol-3', content: '✦', name: 'Star' },
-  { id: 'symbol-4', content: '✧', name: 'Sparkle' },
-  { id: 'symbol-5', content: '☼', name: 'Sun' },
+  { id: 'flourish-1', content: '⚜\uFE0E', name: 'Fleur-de-lis' },
+  { id: 'flourish-2', content: '❦\uFE0E', name: 'Floral Heart' },
+  { id: 'flourish-3', content: '❧\uFE0E', name: 'Vine' },
+  { id: 'symbol-1', content: '❀\uFE0E', name: 'Flower' },
+  { id: 'symbol-2', content: '❁\uFE0E', name: 'Ornate Flower' },
+  { id: 'symbol-3', content: '✦\uFE0E', name: 'Star' },
+  { id: 'symbol-4', content: '✧\uFE0E', name: 'Sparkle' },
+  { id: 'symbol-5', content: '☼\uFE0E', name: 'Sun' },
   
   // Scrolls
-  { id: 'scroll-1', content: '🙘', name: 'Scroll Left' },
-  { id: 'scroll-2', content: '🙙', name: 'Scroll Right' },
-  { id: 'scroll-3', content: '🙚', name: 'Ornate Scroll' },
-  { id: 'scroll-4', content: '🙛', name: 'Fancy Scroll' },
-  { id: 'scroll-5', content: '🙜', name: 'Leafy Scroll' },
-  { id: 'scroll-6', content: '🙝', name: 'Vine Scroll' },
+  { id: 'scroll-1', content: '🙘\uFE0E', name: 'Scroll Left' },
+  { id: 'scroll-2', content: '🙙\uFE0E', name: 'Scroll Right' },
+  { id: 'scroll-3', content: '🙚\uFE0E', name: 'Ornate Scroll' },
+  { id: 'scroll-4', content: '🙛\uFE0E', name: 'Fancy Scroll' },
+  { id: 'scroll-5', content: '🙜\uFE0E', name: 'Leafy Scroll' },
+  { id: 'scroll-6', content: '🙝\uFE0E', name: 'Vine Scroll' },
   
   // Borders & Lines
-  { id: 'border-1', content: '◈', name: 'Diamond' },
-  { id: 'border-2', content: '❖', name: 'Fancy Diamond' },
-  { id: 'border-4', content: '═', name: 'Double Line' },
-  { id: 'border-5', content: '🙤', name: 'Ornate Line' },
-  { id: 'border-6', content: '🙥', name: 'Fancy Line' },
-  { id: 'border-7', content: '🙦', name: 'Scroll Line' },
-  { id: 'border-8', content: '🙧', name: 'Vine Line' },
+  { id: 'border-1', content: '◈\uFE0E', name: 'Diamond' },
+  { id: 'border-2', content: '❖\uFE0E', name: 'Fancy Diamond' },
+  { id: 'border-4', content: '═\uFE0E', name: 'Double Line' },
+  { id: 'border-5', content: '🙤\uFE0E', name: 'Ornate Line' },
+  { id: 'border-6', content: '🙥\uFE0E', name: 'Fancy Line' },
+  { id: 'border-7', content: '🙦\uFE0E', name: 'Scroll Line' },
+  { id: 'border-8', content: '🙧\uFE0E', name: 'Vine Line' },
   
   // Corners
-  { id: 'corner-1', content: '╔', name: 'Top Left' },
-  { id: 'corner-2', content: '╗', name: 'Top Right' },
-  { id: 'corner-3', content: '╚', name: 'Bottom Left' },
-  { id: 'corner-4', content: '╝', name: 'Bottom Right' },
-  { id: 'corner-5', content: '🙐', name: 'Fancy Corner' },
-  { id: 'corner-6', content: '🙑', name: 'Ornate Corner' },
+  { id: 'corner-1', content: '╔\uFE0E', name: 'Top Left' },
+  { id: 'corner-2', content: '╗\uFE0E', name: 'Top Right' },
+  { id: 'corner-3', content: '╚\uFE0E', name: 'Bottom Left' },
+  { id: 'corner-4', content: '╝\uFE0E', name: 'Bottom Right' },
+  { id: 'corner-5', content: '🙐\uFE0E', name: 'Fancy Corner' },
+  { id: 'corner-6', content: '🙑\uFE0E', name: 'Ornate Corner' },
 ];
 
 interface DecorationPickerProps {
   onAdd: (content: string) => void;
   onAddImage: (src: string) => void;
+  selectedColor?: string;
 }
 
-const DecorationPicker = ({ onAdd, onAddImage }: DecorationPickerProps) => {
+const DecorationPicker = ({ onAdd, onAddImage, selectedColor }: DecorationPickerProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +99,12 @@ const DecorationPicker = ({ onAdd, onAddImage }: DecorationPickerProps) => {
               className="h-12 w-12 flex items-center justify-center bg-black/20 border border-amber-900/30 rounded-lg hover:bg-amber-900/40 hover:border-amber-500 transition-all text-2xl"
               title={dec.name}
             >
-              <span className="select-none">{dec.content}</span>
+              <span 
+                className="select-none"
+                style={{ color: selectedColor || 'inherit' }}
+              >
+                {dec.content}
+              </span>
             </button>
           ))}
         </div>

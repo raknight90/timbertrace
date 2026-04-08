@@ -201,6 +201,7 @@ const Index = () => {
             <DecorationPicker 
               onAdd={handleAddDecoration} 
               onAddImage={handleAddImageDecoration}
+              selectedColor={currentDesign.fontColor}
             />
             <DesignLibrary 
               designs={library} 
