@@ -6,20 +6,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Palette, Upload, Image as ImageIcon } from 'lucide-react';
 
 const DECORATIONS = [
-  // Nature & Icons
-  { id: 'leaf-1', content: '🌿', name: 'Leaf' },
-  { id: 'flower-1', content: '🌸', name: 'Flower' },
-  { id: 'star-1', content: '✨', name: 'Sparkle' },
-  { id: 'pine-1', content: '🌲', name: 'Pine' },
-  { id: 'deer-1', content: '🦌', name: 'Deer' },
-  { id: 'anchor-1', content: '⚓', name: 'Anchor' },
-  { id: 'mountain-1', content: '🏔️', name: 'Mountain' },
-  { id: 'sun-1', content: '☀️', name: 'Sun' },
-  
-  // Flourishes & Scrolls
+  // Flourishes & Symbols (Monochrome)
   { id: 'flourish-1', content: '⚜', name: 'Fleur-de-lis' },
   { id: 'flourish-2', content: '❦', name: 'Floral Heart' },
   { id: 'flourish-3', content: '❧', name: 'Vine' },
+  { id: 'symbol-1', content: '❀', name: 'Flower' },
+  { id: 'symbol-2', content: '❁', name: 'Ornate Flower' },
+  { id: 'symbol-3', content: '✦', name: 'Star' },
+  { id: 'symbol-4', content: '✧', name: 'Sparkle' },
+  { id: 'symbol-5', content: '☼', name: 'Sun' },
+  
+  // Scrolls
   { id: 'scroll-1', content: '🙘', name: 'Scroll Left' },
   { id: 'scroll-2', content: '🙙', name: 'Scroll Right' },
   { id: 'scroll-3', content: '🙚', name: 'Ornate Scroll' },
