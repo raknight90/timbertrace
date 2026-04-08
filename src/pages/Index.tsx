@@ -39,7 +39,7 @@ const Index = () => {
   const [showGrid, setShowGrid] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedId, setSelectedId] = useState<string | 'text' | null>(null);
 
   // Load library from local storage
   useEffect(() => {
@@ -101,7 +101,7 @@ const Index = () => {
     setCurrentDesign(newDesign);
     setHistory([JSON.parse(JSON.stringify(newDesign))]);
     setHistoryIndex(0);
-    setSelectedIds([]);
+    setSelectedId(null);
     showSuccess("Started a new design");
   };
 
@@ -110,21 +110,6 @@ const Index = () => {
     setCurrentDesign(updated);
     if (!updates.textPosition) {
       addToHistory(updated);
-    }
-  };
-
-  const handleSelect = (id: string | 'text' | null, isMulti: boolean = false) => {
-    if (id === null) {
-      setSelectedIds([]);
-      return;
-    }
-
-    if (isMulti) {
-      setSelectedIds(prev => 
-        prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-      );
-    } else {
-      setSelectedIds([id]);
     }
   };
 
@@ -144,7 +129,7 @@ const Index = () => {
     };
     setCurrentDesign(updated);
     addToHistory(updated);
-    setSelectedIds([newDec.id]);
+    setSelectedId(newDec.id);
     showSuccess("Decoration added!");
   };
 
@@ -165,7 +150,7 @@ const Index = () => {
     };
     setCurrentDesign(updated);
     addToHistory(updated);
-    setSelectedIds([newDec.id]);
+    setSelectedId(newDec.id);
     showSuccess("Image added!");
   };
 
@@ -185,7 +170,7 @@ const Index = () => {
     };
     setCurrentDesign(updated);
     addToHistory(updated);
-    setSelectedIds([newDec.id]);
+    setSelectedId(newDec.id);
     showSuccess("Decoration duplicated!");
   };
 
@@ -253,7 +238,7 @@ const Index = () => {
     };
     setCurrentDesign(updated);
     addToHistory(updated);
-    setSelectedIds(prev => prev.filter(i => i !== id));
+    setSelectedId(null);
     showSuccess("Decoration removed");
   };
 
@@ -262,7 +247,7 @@ const Index = () => {
     if (!element) return;
 
     // Deselect before saving thumbnail
-    setSelectedIds([]);
+    setSelectedId(null);
 
     // Wait for render
     setTimeout(async () => {
@@ -311,7 +296,7 @@ const Index = () => {
     setCurrentDesign(JSON.parse(JSON.stringify(design)));
     setHistory([JSON.parse(JSON.stringify(design))]);
     setHistoryIndex(0);
-    setSelectedIds([]);
+    setSelectedId(null);
     showSuccess("Design loaded!");
   };
 
@@ -325,7 +310,7 @@ const Index = () => {
     if (!element) return;
 
     // Deselect everything before export
-    setSelectedIds([]);
+    setSelectedId(null);
 
     // Small delay to ensure React has rendered the deselected state
     setTimeout(async () => {
@@ -447,8 +432,8 @@ const Index = () => {
             />
             <LayersPanel 
               design={currentDesign}
-              selectedIds={selectedIds}
-              onSelect={handleSelect}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
               onToggleVisibility={handleToggleVisibility}
               onToggleLock={handleToggleLock}
               onReorder={handleReorderLayer}
@@ -470,7 +455,7 @@ const Index = () => {
               <div className="mb-6 flex items-center justify-between w-full max-w-[800px] mx-auto">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">
-                  {isPrintMode ? "Print Ready Mode Active" : (showGrid ? "Grid Snapping Active" : "Shift+Click to multi-select")}
+                  {isPrintMode ? "Print Ready Mode Active" : (showGrid ? "Grid Snapping Active" : "Drag elements to position")}
                 </div>
               </div>
               
@@ -481,8 +466,8 @@ const Index = () => {
                   showGrid={showGrid}
                   snapToGrid={snapToGrid}
                   isPrintMode={isPrintMode}
-                  selectedIds={selectedIds}
-                  onSelect={handleSelect}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
                   onUpdateDesign={handleUpdateDesign}
                   onUpdateDecoration={handleUpdateDecoration}
                   onRemoveDecoration={handleRemoveDecoration}
