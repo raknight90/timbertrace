@@ -52,6 +52,16 @@ const DECORATIONS = [
   { id: 'border-8', content: '🙨\uFE0E', name: 'Leafy Line' },
   { id: 'border-9', content: '🙩\uFE0E', name: 'Heavy Line' },
   { id: 'border-10', content: '🙪\uFE0E', name: 'Pattern Line' },
+  { id: 'border-11', content: '━\uFE0E', name: 'Bold Line' },
+  { id: 'border-12', content: '┉\uFE0E', name: 'Dashed Bold' },
+  { id: 'border-13', content: '≋\uFE0E', name: 'Triple Wave' },
+  { id: 'border-14', content: '⸻\uFE0E', name: 'Long Dash' },
+  { id: 'border-15', content: '🙫\uFE0E', name: 'Diamond Line' },
+  { id: 'border-16', content: '🙬\uFE0E', name: 'Dot Line' },
+  { id: 'border-17', content: '🙭\uFE0E', name: 'Star Line' },
+  { id: 'border-18', content: '🙮\uFE0E', name: 'Flower Line' },
+  { id: 'border-19', content: '🙯\uFE0E', name: 'Leaf Line' },
+  { id: 'border-20', content: '▬\uFE0E', name: 'Solid Block' },
   
   // Corners
   { id: 'corner-1', content: '╔\uFE0E', name: 'Top Left' },
@@ -62,6 +72,10 @@ const DECORATIONS = [
   { id: 'corner-6', content: '🙑\uFE0E', name: 'Ornate Corner' },
   { id: 'corner-7', content: '🙒\uFE0E', name: 'Leafy Corner' },
   { id: 'corner-8', content: '🙓\uFE0E', name: 'Vine Corner' },
+  { id: 'corner-9', content: '┏\uFE0E', name: 'Bold Top Left' },
+  { id: 'corner-10', content: '┓\uFE0E', name: 'Bold Top Right' },
+  { id: 'corner-11', content: '┗\uFE0E', name: 'Bold Bottom Left' },
+  { id: 'corner-12', content: '┛\uFE0E', name: 'Bold Bottom Right' },
 ];
 
 interface DecorationPickerProps {
