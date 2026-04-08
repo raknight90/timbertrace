@@ -7,6 +7,7 @@ import { Palette, Upload, Image as ImageIcon } from 'lucide-react';
 
 const DECORATIONS = [
   // Flourishes & Symbols (Monochrome)
+  { id: 'flourish-1', content: '⚜', name: 'Fleur-de-lis' },
   { id: 'flourish-2', content: '❦', name: 'Floral Heart' },
   { id: 'flourish-3', content: '❧', name: 'Vine' },
   { id: 'symbol-1', content: '❀', name: 'Flower' },
