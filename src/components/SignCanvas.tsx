@@ -53,17 +53,22 @@ const SignCanvas = ({
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  const ppi = 35; // Increased PPI for a larger base size
+  // Use standard 96 DPI for print mode to ensure real-world scaling
+  // Use 35 PPI for screen display to keep it manageable
+  const ppi = isPrintMode ? 96 : 35; 
   let displayWidth = design.width * ppi;
   let displayHeight = design.height * ppi;
 
-  const maxWidth = 1400; // Increased from 1000
-  const maxHeight = 900; // Increased from 600
+  // Only apply screen constraints if NOT in print mode
+  if (!isPrintMode) {
+    const maxWidth = 1400;
+    const maxHeight = 900;
 
-  if (displayWidth > maxWidth || displayHeight > maxHeight) {
-    const scale = Math.min(maxWidth / displayWidth, maxHeight / displayHeight);
-    displayWidth *= scale;
-    displayHeight *= scale;
+    if (displayWidth > maxWidth || displayHeight > maxHeight) {
+      const scale = Math.min(maxWidth / displayWidth, maxHeight / displayHeight);
+      displayWidth *= scale;
+      displayHeight *= scale;
+    }
   }
 
   const handleMouseDown = (e: React.MouseEvent, targetId: string) => {
@@ -73,7 +78,7 @@ const SignCanvas = ({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !selectedId || !canvasRef.current) return;
+    if (!isDragging || !selectedId || !canvasRef.current || isPrintMode) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
     let x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -110,7 +115,7 @@ const SignCanvas = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!selectedId) return;
+      if (!selectedId || isPrintMode) return;
       const isInputFocused = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '');
       if (isInputFocused) return;
 
@@ -155,7 +160,7 @@ const SignCanvas = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, design, onUpdateDesign, onUpdateText, onUpdateDecoration, onRemoveText, onRemoveDecoration, onSelect]);
+  }, [selectedId, design, onUpdateDesign, onUpdateText, onUpdateDecoration, onRemoveText, onRemoveDecoration, onSelect, isPrintMode]);
 
   useEffect(() => {
     if (isDragging) {
@@ -182,7 +187,7 @@ const SignCanvas = ({
 
   return (
     <div 
-      className="flex items-center justify-center w-full min-h-[600px] p-4 sm:p-12 bg-black/20 rounded-2xl border border-amber-900/10"
+      className={`flex items-center justify-center w-full p-4 sm:p-12 ${isPrintMode ? 'bg-white' : 'bg-black/20 rounded-2xl border border-amber-900/10 min-h-[600px]'}`}
       onClick={() => onSelect(null)}
     >
       <div 
@@ -196,7 +201,7 @@ const SignCanvas = ({
         }}
       >
         {/* Wood Sign Container */}
-        <div className={`absolute inset-0 overflow-hidden rounded-sm shadow-2xl border ${isPrintMode ? 'border-gray-200' : 'border-black/40'}`}>
+        <div className={`absolute inset-0 overflow-hidden rounded-sm ${isPrintMode ? 'border border-gray-200' : 'shadow-2xl border border-black/40'}`}>
           <div 
             className="absolute inset-0 transition-colors duration-300"
             style={{ backgroundColor: isPrintMode ? '#FFFFFF' : WOOD_COLORS[design.material] }}
@@ -255,15 +260,15 @@ const SignCanvas = ({
                   style={{ 
                     ...getEngravingStyle(textEl.fontColor),
                     fontFamily: textEl.fontFamily, 
-                    fontSize: `${textEl.fontSize}px`,
-                    letterSpacing: `${textEl.letterSpacing}px`,
+                    fontSize: `${textEl.fontSize * (isPrintMode ? 2.74 : 1)}px`, // Scale font size for 96 DPI print
+                    letterSpacing: `${textEl.letterSpacing * (isPrintMode ? 2.74 : 1)}px`,
                   }}
                   className="text-center leading-tight select-none font-bold tracking-tight whitespace-nowrap"
                 >
                   {textEl.text || "Your Text Here"}
                 </h2>
 
-                {isSelected && (
+                {isSelected && !isPrintMode && (
                   <div className={`absolute ${textEl.position.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
                     <div className="flex items-center gap-1 px-1 border-r border-amber-900/30">
                       <button 
@@ -319,7 +324,7 @@ const SignCanvas = ({
                     alt={dec.name}
                     className="select-none block pointer-events-none"
                     style={{
-                      width: `${100 * dec.scale}px`,
+                      width: `${100 * dec.scale * (isPrintMode ? 2.74 : 1)}px`,
                       height: 'auto',
                       filter: isPrintMode ? 'grayscale(1) contrast(200%) brightness(0)' : 'brightness(0.8) contrast(1.2) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))',
                       mixBlendMode: isPrintMode ? 'normal' : 'multiply'
@@ -327,17 +332,17 @@ const SignCanvas = ({
                   />
                 ) : (
                   <span 
-                    className="text-5xl select-none block"
+                    className="select-none block"
                     style={{
                       ...getEngravingStyle(design.textElements[0]?.fontColor || '#1a1a1a'),
-                      transform: `scale(${dec.scale})`,
+                      fontSize: `${48 * dec.scale * (isPrintMode ? 2.74 : 1)}px`,
                     }}
                   >
                     {dec.content}
                   </span>
                 )}
 
-                {isSelected && (
+                {isSelected && !isPrintMode && (
                   <div className={`absolute ${dec.position.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
                     <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
                       <Maximize size={12} className="text-amber-200/60" />
