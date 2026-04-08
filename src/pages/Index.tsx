@@ -31,13 +31,11 @@ const Index = () => {
   const [currentDesign, setCurrentDesign] = useState<EngravingDesign>(DEFAULT_DESIGN);
   const [library, setLibrary] = useState<EngravingDesign[]>([]);
 
-  // Load library from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('wood-sign-library');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Migration: ensure textPosition exists
         const migrated = parsed.map((d: any) => ({
           ...d,
           textPosition: d.textPosition || { x: 50, y: 50 }
@@ -49,7 +47,6 @@ const Index = () => {
     }
   }, []);
 
-  // Save library to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('wood-sign-library', JSON.stringify(library));
   }, [library]);
@@ -72,6 +69,40 @@ const Index = () => {
       decorations: [...prev.decorations, newDec]
     }));
     showSuccess("Decoration added!");
+  };
+
+  const handleAddImageDecoration = (src: string) => {
+    const newDec: Decoration = {
+      id: Math.random().toString(36).substr(2, 9),
+      type: 'image',
+      name: 'Custom Image',
+      content: '',
+      src,
+      position: { x: 50, y: 50 },
+      scale: 1,
+    };
+    setCurrentDesign(prev => ({
+      ...prev,
+      decorations: [...prev.decorations, newDec]
+    }));
+    showSuccess("Image added!");
+  };
+
+  const handleDuplicateDecoration = (id: string) => {
+    const decToDup = currentDesign.decorations.find(d => d.id === id);
+    if (!decToDup) return;
+
+    const newDec: Decoration = {
+      ...decToDup,
+      id: Math.random().toString(36).substr(2, 9),
+      position: { x: decToDup.position.x + 5, y: decToDup.position.y + 5 }
+    };
+
+    setCurrentDesign(prev => ({
+      ...prev,
+      decorations: [...prev.decorations, newDec]
+    }));
+    showSuccess("Decoration duplicated!");
   };
 
   const handleUpdateDecoration = (id: string, updates: Partial<Decoration>) => {
@@ -144,7 +175,6 @@ const Index = () => {
         backgroundImage: 'radial-gradient(circle at center, rgba(42, 26, 10, 0.4) 0%, rgba(15, 10, 5, 1) 100%)',
       }}
     >
-      {/* Header */}
       <header className="border-b border-amber-900/30 bg-black/60 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -156,16 +186,11 @@ const Index = () => {
               <p className="text-[10px] uppercase tracking-[0.2em] text-amber-500/60 font-semibold">Engraving Template Studio</p>
             </div>
           </div>
-          <div className="hidden md:block text-sm text-amber-200/40 italic">
-            Crafting digital templates for physical masterpieces
-          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-6 py-10 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          
-          {/* Left Column: Controls */}
           <div className="lg:col-span-4 space-y-6">
             <DesignToolbar 
               design={currentDesign} 
@@ -173,7 +198,10 @@ const Index = () => {
               onSave={handleSaveToLibrary}
               onExport={handleExportPDF}
             />
-            <DecorationPicker onAdd={handleAddDecoration} />
+            <DecorationPicker 
+              onAdd={handleAddDecoration} 
+              onAddImage={handleAddImageDecoration}
+            />
             <DesignLibrary 
               designs={library} 
               onLoad={handleLoadDesign} 
@@ -181,15 +209,10 @@ const Index = () => {
             />
           </div>
 
-          {/* Right Column: Preview */}
           <div className="lg:col-span-8 flex flex-col items-center justify-start pt-4">
             <div className="w-full sticky top-28">
               <div className="mb-6 flex items-center justify-between w-full max-w-[800px]">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
-                <div className="flex gap-4 text-xs text-amber-200/40">
-                  <span>Click text or decorations to move/resize</span>
-                  <span>Wood Type: {currentDesign.material.toUpperCase()}</span>
-                </div>
               </div>
               
               <div className="flex justify-center w-full">
@@ -199,31 +222,14 @@ const Index = () => {
                   onUpdateDesign={handleUpdateDesign}
                   onUpdateDecoration={handleUpdateDecoration}
                   onRemoveDecoration={handleRemoveDecoration}
+                  onDuplicateDecoration={handleDuplicateDecoration}
                 />
-              </div>
-
-              <div className="mt-12 p-6 rounded-xl bg-black/40 backdrop-blur-sm border border-amber-900/20 max-w-[800px] w-full">
-                <h3 className="text-sm font-semibold text-amber-200 mb-2 uppercase tracking-wider">Editor Controls</h3>
-                <p className="text-sm text-amber-200/60 leading-relaxed">
-                  Drag the text or decorations to reposition them. When selected, use the handles to resize. 
-                  All elements will maintain the chosen fill color for the final template.
-                </p>
               </div>
             </div>
           </div>
         </div>
       </main>
-
-      <footer className="mt-20 border-t border-amber-900/20 py-10 bg-black/80 backdrop-blur-md">
-        <div className="container mx-auto px-6 flex flex-col items-center gap-4">
-          <div className="flex gap-8 text-amber-200/30 text-sm">
-            <a href="#" className="hover:text-amber-200 transition-colors">Privacy</a>
-            <a href="#" className="hover:text-amber-200 transition-colors">Terms</a>
-            <a href="#" className="hover:text-amber-200 transition-colors">Support</a>
-          </div>
-          <MadeWithDyad />
-        </div>
-      </footer>
+      <MadeWithDyad />
     </div>
   );
 };

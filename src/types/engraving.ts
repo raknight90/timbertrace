@@ -1,8 +1,9 @@
 export interface Decoration {
   id: string;
-  type: 'border' | 'corner' | 'icon';
+  type: 'border' | 'corner' | 'icon' | 'image';
   name: string;
-  content: string;
+  content: string; // For icons/text-based decs
+  src?: string;    // For uploaded images
   position: { x: number; y: number };
   scale: number;
 }
