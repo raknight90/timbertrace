@@ -2,10 +2,12 @@ export interface Decoration {
   id: string;
   type: 'border' | 'corner' | 'icon';
   name: string;
-  content: string; // SVG path or icon name
+  content: string;
   position: { x: number; y: number };
   scale: number;
 }
+
+export type WoodMaterial = 'walnut' | 'oak' | 'cherry' | 'pine';
 
 export interface EngravingDesign {
   id: string;
@@ -15,6 +17,7 @@ export interface EngravingDesign {
   text: string;
   fontFamily: string;
   fontSize: number;
+  material: WoodMaterial;
   decorations: Decoration[];
   createdAt: number;
 }

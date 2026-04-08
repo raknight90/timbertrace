@@ -1,13 +1,13 @@
 "use client";
 
 import React from 'react';
-import { EngravingDesign } from '@/types/engraving';
+import { EngravingDesign, WoodMaterial } from '@/types/engraving';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Palette, Save, Download, Trash2 } from 'lucide-react';
+import { Type, Maximize2, Palette, Save, Download, Trees } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -15,6 +15,13 @@ const FONTS = [
   { name: 'Modern Sans', value: "'Inter', sans-serif" },
   { name: 'Vintage Slab', value: "'Arvo', serif" },
   { name: 'Elegant Cursive', value: "'Great Vibes', cursive" },
+];
+
+const MATERIALS: { name: string; value: WoodMaterial }[] = [
+  { name: 'Dark Walnut', value: 'walnut' },
+  { name: 'Light Oak', value: 'oak' },
+  { name: 'Cherry Wood', value: 'cherry' },
+  { name: 'Reclaimed Pine', value: 'pine' },
 ];
 
 interface DesignToolbarProps {
@@ -27,6 +34,29 @@ interface DesignToolbarProps {
 const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProps) => {
   return (
     <div className="bg-[#2a1a0a]/90 backdrop-blur-md border border-amber-900/30 p-6 rounded-xl shadow-xl space-y-8 text-amber-50">
+      {/* Material Selection */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 text-amber-200">
+          <Trees size={18} />
+          <h3 className="font-semibold uppercase tracking-wider text-sm">Wood Material</h3>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {MATERIALS.map((mat) => (
+            <button
+              key={mat.value}
+              onClick={() => onUpdate({ material: mat.value })}
+              className={`px-3 py-2 text-xs rounded-lg border transition-all ${
+                design.material === mat.value 
+                  ? 'bg-amber-700 border-amber-500 text-white' 
+                  : 'bg-black/20 border-amber-900/50 text-amber-200/60 hover:border-amber-700'
+              }`}
+            >
+              {mat.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Dimensions */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-amber-200">

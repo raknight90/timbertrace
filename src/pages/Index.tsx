@@ -20,6 +20,7 @@ const DEFAULT_DESIGN: EngravingDesign = {
   text: 'THE SMITHS',
   fontFamily: "'Playfair Display', serif",
   fontSize: 80,
+  material: 'walnut',
   decorations: [],
   createdAt: Date.now(),
 };
@@ -167,7 +168,7 @@ const Index = () => {
                 <h2 className="text-lg font-medium text-amber-200/80">Live Preview</h2>
                 <div className="flex gap-4 text-xs text-amber-200/40">
                   <span>Scale: 1:1 (Digital)</span>
-                  <span>Material: Dark Walnut</span>
+                  <span>Material: {currentDesign.material.toUpperCase()}</span>
                 </div>
               </div>
               
