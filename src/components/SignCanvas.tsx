@@ -80,6 +80,18 @@ const SignCanvas = ({
     }
   }, [isDragging]);
 
+  // Shared engraving style for text and glyph decorations
+  const engravingStyle = {
+    color: design.fontColor,
+    textShadow: `
+      0px -2px 1px rgba(0,0,0,0.9),
+      0px 1px 1px rgba(255,255,255,0.2),
+      0px 4px 8px rgba(0,0,0,0.4)
+    `,
+    mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal' as any,
+    filter: 'contrast(1.1) brightness(0.85) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))'
+  };
+
   return (
     <div 
       className="flex items-center justify-center w-full min-h-[550px] p-8 bg-black/20 rounded-2xl border border-amber-900/10"
@@ -122,16 +134,9 @@ const SignCanvas = ({
           >
             <h2 
               style={{ 
+                ...engravingStyle,
                 fontFamily: design.fontFamily, 
                 fontSize: `${design.fontSize}px`,
-                color: design.fontColor,
-                textShadow: `
-                  0px -2px 1px rgba(0,0,0,0.9),
-                  0px 1px 1px rgba(255,255,255,0.2),
-                  0px 4px 8px rgba(0,0,0,0.4)
-                `,
-                mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal',
-                filter: 'contrast(1.1) brightness(0.85) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))'
               }}
               className="text-center leading-tight select-none font-bold tracking-tight whitespace-nowrap"
             >
@@ -191,11 +196,8 @@ const SignCanvas = ({
                   <span 
                     className="text-5xl select-none block"
                     style={{
-                      color: design.fontColor,
+                      ...engravingStyle,
                       transform: `scale(${dec.scale})`,
-                      textShadow: '0px -1px 1px rgba(0,0,0,0.8), 0px 1px 1px rgba(255,255,255,0.1)',
-                      mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal',
-                      filter: 'brightness(0.8)'
                     }}
                   >
                     {dec.content}
