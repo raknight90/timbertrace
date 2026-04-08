@@ -7,32 +7,51 @@ import { Palette, Upload, Image as ImageIcon } from 'lucide-react';
 
 // Appending \uFE0E forces the browser to render the character as text rather than a colorful emoji
 const DECORATIONS = [
-  // Flourishes & Symbols (Monochrome)
+  // Flourishes & Floral
   { id: 'flourish-1', content: '⚜\uFE0E', name: 'Fleur-de-lis' },
   { id: 'flourish-2', content: '❦\uFE0E', name: 'Floral Heart' },
   { id: 'flourish-3', content: '❧\uFE0E', name: 'Vine' },
-  { id: 'symbol-1', content: '❀\uFE0E', name: 'Flower' },
-  { id: 'symbol-2', content: '❁\uFE0E', name: 'Ornate Flower' },
-  { id: 'symbol-3', content: '✦\uFE0E', name: 'Star' },
-  { id: 'symbol-4', content: '✧\uFE0E', name: 'Sparkle' },
-  { id: 'symbol-5', content: '☼\uFE0E', name: 'Sun' },
+  { id: 'flourish-4', content: '☘\uFE0E', name: 'Shamrock' },
+  { id: 'flourish-5', content: '❀\uFE0E', name: 'Flower' },
+  { id: 'flourish-6', content: '❁\uFE0E', name: 'Ornate Flower' },
+  { id: 'flourish-7', content: '❃\uFE0E', name: 'Petal' },
+  { id: 'flourish-8', content: '✾\uFE0E', name: 'Blossom' },
+  { id: 'flourish-9', content: '✽\uFE0E', name: 'Floral Star' },
+  { id: 'flourish-10', content: '⚘\uFE0E', name: 'Stemmed Flower' },
   
-  // Scrolls
+  // Celestial & Symbols
+  { id: 'symbol-1', content: '✦\uFE0E', name: 'Star' },
+  { id: 'symbol-2', content: '✧\uFE0E', name: 'Sparkle' },
+  { id: 'symbol-3', content: '☼\uFE0E', name: 'Sun' },
+  { id: 'symbol-4', content: '☽\uFE0E', name: 'Moon' },
+  { id: 'symbol-5', content: '☄\uFE0E', name: 'Comet' },
+  { id: 'symbol-6', content: '⚓\uFE0E', name: 'Anchor' },
+  { id: 'symbol-7', content: '⚖\uFE0E', name: 'Scales' },
+  { id: 'symbol-8', content: '⚔\uFE0E', name: 'Swords' },
+  { id: 'symbol-9', content: '🛡\uFE0E', name: 'Shield' },
+  { id: 'symbol-10', content: '🗝\uFE0E', name: 'Key' },
+  
+  // Scrolls & Ornaments
   { id: 'scroll-1', content: '🙘\uFE0E', name: 'Scroll Left' },
   { id: 'scroll-2', content: '🙙\uFE0E', name: 'Scroll Right' },
   { id: 'scroll-3', content: '🙚\uFE0E', name: 'Ornate Scroll' },
   { id: 'scroll-4', content: '🙛\uFE0E', name: 'Fancy Scroll' },
   { id: 'scroll-5', content: '🙜\uFE0E', name: 'Leafy Scroll' },
   { id: 'scroll-6', content: '🙝\uFE0E', name: 'Vine Scroll' },
+  { id: 'scroll-7', content: '🙞\uFE0E', name: 'Heavy Scroll' },
+  { id: 'scroll-8', content: '🙟\uFE0E', name: 'Double Scroll' },
   
   // Borders & Lines
   { id: 'border-1', content: '◈\uFE0E', name: 'Diamond' },
   { id: 'border-2', content: '❖\uFE0E', name: 'Fancy Diamond' },
-  { id: 'border-4', content: '═\uFE0E', name: 'Double Line' },
-  { id: 'border-5', content: '🙤\uFE0E', name: 'Ornate Line' },
-  { id: 'border-6', content: '🙥\uFE0E', name: 'Fancy Line' },
-  { id: 'border-7', content: '🙦\uFE0E', name: 'Scroll Line' },
-  { id: 'border-8', content: '🙧\uFE0E', name: 'Vine Line' },
+  { id: 'border-3', content: '═\uFE0E', name: 'Double Line' },
+  { id: 'border-4', content: '🙤\uFE0E', name: 'Ornate Line' },
+  { id: 'border-5', content: '🙥\uFE0E', name: 'Fancy Line' },
+  { id: 'border-6', content: '🙦\uFE0E', name: 'Scroll Line' },
+  { id: 'border-7', content: '🙧\uFE0E', name: 'Vine Line' },
+  { id: 'border-8', content: '🙨\uFE0E', name: 'Leafy Line' },
+  { id: 'border-9', content: '🙩\uFE0E', name: 'Heavy Line' },
+  { id: 'border-10', content: '🙪\uFE0E', name: 'Pattern Line' },
   
   // Corners
   { id: 'corner-1', content: '╔\uFE0E', name: 'Top Left' },
@@ -41,6 +60,8 @@ const DECORATIONS = [
   { id: 'corner-4', content: '╝\uFE0E', name: 'Bottom Right' },
   { id: 'corner-5', content: '🙐\uFE0E', name: 'Fancy Corner' },
   { id: 'corner-6', content: '🙑\uFE0E', name: 'Ornate Corner' },
+  { id: 'corner-7', content: '🙒\uFE0E', name: 'Leafy Corner' },
+  { id: 'corner-8', content: '🙓\uFE0E', name: 'Vine Corner' },
 ];
 
 interface DecorationPickerProps {
