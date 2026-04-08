@@ -166,7 +166,7 @@ const Index = () => {
                 <h2 className="text-lg font-medium text-amber-200/80">Live Preview</h2>
                 <div className="flex gap-4 text-xs text-amber-200/40">
                   <span>Scale: 1:1 (Digital)</span>
-                  <span>Material: {currentDesign.material.toUpperCase()}</span>
+                  <span>Wood Type: {currentDesign.material.toUpperCase()}</span>
                 </div>
               </div>
               

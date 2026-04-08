@@ -17,27 +17,11 @@ const FONTS = [
   { name: 'Elegant Cursive', value: "'Great Vibes', cursive" },
 ];
 
-const MATERIALS: { name: string; value: WoodMaterial; image: string }[] = [
-  { 
-    name: 'Dark Walnut', 
-    value: 'walnut',
-    image: "https://images.unsplash.com/photo-1622398925373-3f91b1e275f5?q=80&w=200&auto=format&fit=crop"
-  },
-  { 
-    name: 'Light Oak', 
-    value: 'oak',
-    image: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?q=80&w=200&auto=format&fit=crop"
-  },
-  { 
-    name: 'Cherry Wood', 
-    value: 'cherry',
-    image: "https://images.unsplash.com/photo-1531685250784-7569952593d2?q=80&w=200&auto=format&fit=crop"
-  },
-  { 
-    name: 'Reclaimed Pine', 
-    value: 'pine',
-    image: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=200&auto=format&fit=crop"
-  },
+const WOOD_TYPES: { name: string; value: WoodMaterial; color: string }[] = [
+  { name: 'American Walnut', value: 'walnut', color: '#3d2b1f' },
+  { name: 'White Oak', value: 'oak', color: '#d2b48c' },
+  { name: 'Black Cherry', value: 'cherry', color: '#8b4513' },
+  { name: 'Eastern Pine', value: 'pine', color: '#f5deb3' },
 ];
 
 const COLORS = [
@@ -59,40 +43,30 @@ interface DesignToolbarProps {
 const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProps) => {
   return (
     <div className="bg-[#2a1a0a]/90 backdrop-blur-md border border-amber-900/30 p-6 rounded-xl shadow-xl space-y-8 text-amber-50">
-      {/* Material Selection */}
+      {/* Wood Type Selection */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-amber-200">
           <Trees size={18} />
-          <h3 className="font-semibold uppercase tracking-wider text-sm">Wood Material</h3>
+          <h3 className="font-semibold uppercase tracking-wider text-sm">Wood Type</h3>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          {MATERIALS.map((mat) => (
-            <button
-              key={mat.value}
-              onClick={() => onUpdate({ material: mat.value })}
-              className={`group relative h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                design.material === mat.value 
-                  ? 'border-amber-500 ring-2 ring-amber-500/20' 
-                  : 'border-transparent hover:border-amber-700'
-              }`}
-            >
-              <img 
-                src={mat.image} 
-                alt={mat.name} 
-                className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-2 text-center">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white drop-shadow-md">
-                  {mat.name}
-                </span>
-                {design.material === mat.value && (
-                  <Check size={16} className="text-amber-400 mt-1" />
-                )}
-              </div>
-            </button>
-          ))}
-        </div>
+        <Select 
+          value={design.material} 
+          onValueChange={(val) => onUpdate({ material: val as WoodMaterial })}
+        >
+          <SelectTrigger className="bg-black/20 border-amber-900/50 h-12">
+            <SelectValue placeholder="Select Wood Type" />
+          </SelectTrigger>
+          <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
+            {WOOD_TYPES.map(wood => (
+              <SelectItem key={wood.value} value={wood.value}>
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-sm border border-white/10" style={{ backgroundColor: wood.color }} />
+                  {wood.name}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Dimensions */}
