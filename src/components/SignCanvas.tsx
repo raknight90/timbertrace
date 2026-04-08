@@ -72,11 +72,9 @@ const SignCanvas = ({
 
     // Snapping Logic
     if (snapToGrid) {
-      // Snap to center lines (50%)
       if (Math.abs(x - 50) < 2) x = 50;
       if (Math.abs(y - 50) < 2) y = 50;
 
-      // Snap to 1-inch grid (if grid is visible or always)
       const gridStepX = (1 / design.width) * 100;
       const gridStepY = (1 / design.height) * 100;
       
@@ -179,14 +177,26 @@ const SignCanvas = ({
           height: `${displayHeight}px`,
         }}
       >
-        <div className="absolute inset-0 overflow-hidden rounded-sm shadow-2xl border border-black/30">
+        {/* Wood Sign Container */}
+        <div className="absolute inset-0 overflow-hidden rounded-sm shadow-2xl border border-black/40">
+          {/* Base Wood Color */}
           <div 
             className="absolute inset-0"
             style={{ backgroundColor: WOOD_COLORS[design.material] }}
           />
+          
+          {/* Wood Grain Texture */}
           <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none" />
+          
+          {/* Chaffed/Beveled Edge Effect */}
+          <div className="absolute inset-0 pointer-events-none rounded-sm shadow-[inset_0_0_15px_rgba(0,0,0,0.7),inset_0_0_2px_rgba(0,0,0,0.9)]" />
+          
+          {/* Worn Edge Highlight (Sanded Look) */}
+          <div className="absolute inset-0 pointer-events-none rounded-sm border border-white/10 mix-blend-screen opacity-20" />
+          
+          {/* Lighting/Depth Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/20 pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,transparent_70%)] pointer-events-none" />
           
           {/* Grid Overlay */}
           {showGrid && (
