@@ -73,6 +73,54 @@ const SignCanvas = ({
     setIsDragging(false);
   };
 
+  // Keyboard navigation for fine-tuning
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedId) return;
+      
+      // Don't move elements if user is typing in an input
+      const isInputFocused = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '');
+      if (isInputFocused) return;
+
+      const step = e.shiftKey ? 2 : 0.5;
+      let dx = 0;
+      let dy = 0;
+
+      switch (e.key) {
+        case 'ArrowLeft': dx = -step; break;
+        case 'ArrowRight': dx = step; break;
+        case 'ArrowUp': dy = -step; break;
+        case 'ArrowDown': dy = step; break;
+        case 'Delete':
+        case 'Backspace':
+          if (selectedId !== 'text') {
+            onRemoveDecoration?.(selectedId);
+            setSelectedId(null);
+          }
+          return;
+        default: return;
+      }
+
+      e.preventDefault();
+
+      if (selectedId === 'text') {
+        const newX = Math.max(0, Math.min(100, design.textPosition.x + dx));
+        const newY = Math.max(0, Math.min(100, design.textPosition.y + dy));
+        onUpdateDesign?.({ textPosition: { x: newX, y: newY } });
+      } else {
+        const dec = design.decorations.find(d => d.id === selectedId);
+        if (dec) {
+          const newX = Math.max(0, Math.min(100, dec.position.x + dx));
+          const newY = Math.max(0, Math.min(100, dec.position.y + dy));
+          onUpdateDecoration?.(selectedId, { position: { x: newX, y: newY } });
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, design, onUpdateDesign, onUpdateDecoration, onRemoveDecoration]);
+
   useEffect(() => {
     if (isDragging) {
       window.addEventListener('mouseup', handleMouseUp);
