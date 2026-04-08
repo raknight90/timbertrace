@@ -8,10 +8,11 @@ import DecorationPicker from '@/components/DecorationPicker';
 import DesignLibrary from '@/components/DesignLibrary';
 import { showSuccess, showError } from '@/utils/toast';
 import html2canvas from 'html2canvas';
-import { Hammer, Plus, Undo2, Redo2, Grid3X3, Printer } from 'lucide-react';
+import { Hammer, Plus, Undo2, Redo2, Grid3X3, Printer, ZoomIn, ZoomOut, Search } from 'lucide-react';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 
 const DEFAULT_DESIGN: EngravingDesign = {
   id: '1',
@@ -43,6 +44,7 @@ const Index = () => {
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
 
   // Load library from local storage
   useEffect(() => {
@@ -111,6 +113,8 @@ const Index = () => {
   const handleUpdateDesign = (updates: Partial<EngravingDesign>) => {
     const updated = { ...currentDesign, ...updates };
     setCurrentDesign(updated);
+    // Only add to history if it's not a "transient" update like typing a name
+    // or if we want to debounced history for dimensions
     addToHistory(updated);
   };
 
@@ -432,13 +436,47 @@ const Index = () => {
                 <Printer size={16} />
               </Button>
             </div>
+
+            <div className="flex items-center gap-4 bg-black/40 px-3 py-1 rounded-lg border border-amber-900/20">
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setZoom(Math.max(0.2, zoom - 0.1))}
+                  className="h-7 w-7 text-amber-200"
+                >
+                  <ZoomOut size={14} />
+                </Button>
+                <div className="w-24 hidden sm:block">
+                  <Slider 
+                    value={[zoom]} 
+                    min={0.2} 
+                    max={3} 
+                    step={0.1} 
+                    onValueChange={([val]) => setZoom(val)}
+                  />
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setZoom(Math.min(3, zoom + 0.1))}
+                  className="h-7 w-7 text-amber-200"
+                >
+                  <ZoomIn size={14} />
+                </Button>
+                <span className="text-[10px] font-mono text-amber-500/80 w-8 text-right">
+                  {Math.round(zoom * 100)}%
+                </span>
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
             <div className="hidden md:block">
               <Input 
                 value={currentDesign.name}
-                onChange={(e) => handleUpdateDesign({ name: e.target.value })}
+                onChange={(e) => setCurrentDesign({ ...currentDesign, name: e.target.value })}
+                onBlur={() => addToHistory(currentDesign)}
                 className="bg-black/40 border-amber-900/30 text-amber-100 h-9 w-48 focus:ring-amber-500"
                 placeholder="Project Name"
               />
@@ -482,7 +520,7 @@ const Index = () => {
           </div>
 
           <div className="lg:col-span-8 flex flex-col items-center justify-start pt-4 lg:sticky lg:top-24">
-            <div className="w-full">
+            <div className="w-full overflow-auto custom-scrollbar max-h-[calc(100vh-12rem)] p-4 bg-black/10 rounded-2xl border border-amber-900/5">
               <div className="mb-6 flex items-center justify-between w-full max-w-[800px] mx-auto no-print">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">
@@ -490,7 +528,7 @@ const Index = () => {
                 </div>
               </div>
               
-              <div id="sign-preview-wrapper" className="flex justify-center w-full">
+              <div id="sign-preview-wrapper" className="flex justify-center w-full transition-transform duration-200 ease-out origin-top" style={{ transform: `scale(${zoom})` }}>
                 <SignCanvas 
                   design={currentDesign} 
                   id="sign-preview" 

@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { EngravingDesign, WoodMaterial, TextElement } from '@/types/engraving';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -61,6 +61,31 @@ const DesignToolbar = ({
   onPrint
 }: DesignToolbarProps) => {
   const selectedText = design.textElements.find(t => t.id === selectedId);
+  
+  // Local state for dimensions to prevent jumping while typing
+  const [localWidth, setLocalWidth] = useState(design.width.toString());
+  const [localHeight, setLocalHeight] = useState(design.height.toString());
+
+  useEffect(() => {
+    setLocalWidth(design.width.toString());
+    setLocalHeight(design.height.toString());
+  }, [design.width, design.height]);
+
+  const handleWidthChange = (val: string) => {
+    setLocalWidth(val);
+    const num = parseFloat(val);
+    if (!isNaN(num) && num > 0) {
+      onUpdate({ width: num });
+    }
+  };
+
+  const handleHeightChange = (val: string) => {
+    setLocalHeight(val);
+    const num = parseFloat(val);
+    if (!isNaN(num) && num > 0) {
+      onUpdate({ height: num });
+    }
+  };
 
   return (
     <div className="bg-[#2a1a0a]/90 backdrop-blur-md border border-amber-900/30 p-6 rounded-xl shadow-xl space-y-8 text-amber-50">
@@ -106,9 +131,9 @@ const DesignToolbar = ({
             <Label htmlFor="width" className="text-xs text-amber-200/60">Width (inches)</Label>
             <Input 
               id="width"
-              type="number" 
-              value={design.width} 
-              onChange={(e) => onUpdate({ width: Number(e.target.value) })}
+              type="text" 
+              value={localWidth} 
+              onChange={(e) => handleWidthChange(e.target.value)}
               className="bg-black/20 border-amber-900/50 focus:ring-amber-500"
             />
           </div>
@@ -116,9 +141,9 @@ const DesignToolbar = ({
             <Label htmlFor="height" className="text-xs text-amber-200/60">Height (inches)</Label>
             <Input 
               id="height"
-              type="number" 
-              value={design.height} 
-              onChange={(e) => onUpdate({ height: Number(e.target.value) })}
+              type="text" 
+              value={localHeight} 
+              onChange={(e) => handleHeightChange(e.target.value)}
               className="bg-black/20 border-amber-900/50 focus:ring-amber-500"
             />
           </div>
