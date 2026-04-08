@@ -20,5 +20,6 @@ export interface EngravingDesign {
   fontColor: string;
   material: WoodMaterial;
   decorations: Decoration[];
+  textPosition: { x: number; y: number };
   createdAt: number;
 }

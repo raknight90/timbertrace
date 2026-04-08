@@ -23,6 +23,7 @@ const DEFAULT_DESIGN: EngravingDesign = {
   fontColor: 'rgba(20, 10, 5, 0.9)',
   material: 'walnut',
   decorations: [],
+  textPosition: { x: 50, y: 50 },
   createdAt: Date.now(),
 };
 
@@ -35,7 +36,13 @@ const Index = () => {
     const saved = localStorage.getItem('wood-sign-library');
     if (saved) {
       try {
-        setLibrary(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Migration: ensure textPosition exists
+        const migrated = parsed.map((d: any) => ({
+          ...d,
+          textPosition: d.textPosition || { x: 50, y: 50 }
+        }));
+        setLibrary(migrated);
       } catch (e) {
         console.error("Failed to load library", e);
       }
@@ -180,7 +187,7 @@ const Index = () => {
               <div className="mb-6 flex items-center justify-between w-full max-w-[800px]">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="flex gap-4 text-xs text-amber-200/40">
-                  <span>Click decorations to move/resize</span>
+                  <span>Click text or decorations to move/resize</span>
                   <span>Wood Type: {currentDesign.material.toUpperCase()}</span>
                 </div>
               </div>
@@ -189,6 +196,7 @@ const Index = () => {
                 <SignCanvas 
                   design={currentDesign} 
                   id="sign-preview" 
+                  onUpdateDesign={handleUpdateDesign}
                   onUpdateDecoration={handleUpdateDecoration}
                   onRemoveDecoration={handleRemoveDecoration}
                 />
@@ -197,7 +205,7 @@ const Index = () => {
               <div className="mt-12 p-6 rounded-xl bg-black/40 backdrop-blur-sm border border-amber-900/20 max-w-[800px] w-full">
                 <h3 className="text-sm font-semibold text-amber-200 mb-2 uppercase tracking-wider">Editor Controls</h3>
                 <p className="text-sm text-amber-200/60 leading-relaxed">
-                  Drag decorations to reposition them. When a decoration is selected, use the handles to resize or the trash icon to remove it. 
+                  Drag the text or decorations to reposition them. When selected, use the handles to resize. 
                   All elements will maintain the chosen fill color for the final template.
                 </p>
               </div>

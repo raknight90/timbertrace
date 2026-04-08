@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { EngravingDesign, WoodMaterial, Decoration } from '@/types/engraving';
-import { Trash2, Move, Maximize } from 'lucide-react';
+import { Trash2, Move, Maximize, Type } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 const WOOD_COLORS: Record<WoodMaterial, string> = {
@@ -15,24 +15,25 @@ const WOOD_COLORS: Record<WoodMaterial, string> = {
 interface SignCanvasProps {
   design: EngravingDesign;
   id?: string;
+  onUpdateDesign?: (updates: Partial<EngravingDesign>) => void;
   onUpdateDecoration?: (id: string, updates: Partial<Decoration>) => void;
   onRemoveDecoration?: (id: string) => void;
 }
 
-const SignCanvas = ({ design, id, onUpdateDecoration, onRemoveDecoration }: SignCanvasProps) => {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+const SignCanvas = ({ design, id, onUpdateDesign, onUpdateDecoration, onRemoveDecoration }: SignCanvasProps) => {
+  const [selectedId, setSelectedId] = useState<string | 'text' | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   const aspectRatio = design.width / design.height;
 
-  const handleMouseDown = (e: React.MouseEvent, decId: string) => {
+  const handleMouseDown = (e: React.MouseEvent, targetId: string | 'text') => {
     e.stopPropagation();
-    setSelectedId(decId);
+    setSelectedId(targetId);
     setIsDragging(true);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !selectedId || !canvasRef.current || !onUpdateDecoration) return;
+    if (!isDragging || !selectedId || !canvasRef.current) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -42,7 +43,11 @@ const SignCanvas = ({ design, id, onUpdateDecoration, onRemoveDecoration }: Sign
     const constrainedX = Math.max(0, Math.min(100, x));
     const constrainedY = Math.max(0, Math.min(100, y));
 
-    onUpdateDecoration(selectedId, { position: { x: constrainedX, y: constrainedY } });
+    if (selectedId === 'text') {
+      onUpdateDesign?.({ textPosition: { x: constrainedX, y: constrainedY } });
+    } else {
+      onUpdateDecoration?.(selectedId, { position: { x: constrainedX, y: constrainedY } });
+    }
   };
 
   const handleMouseUp = () => {
@@ -83,10 +88,20 @@ const SignCanvas = ({ design, id, onUpdateDecoration, onRemoveDecoration }: Sign
       <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none" />
 
-      {/* Engraving Effect Container */}
-      <div className="absolute inset-0 flex items-center justify-center p-12 pointer-events-none">
-        <div className="relative w-full h-full flex items-center justify-center">
-          {/* Main Text */}
+      {/* Main Text Layer */}
+      <div 
+        className={`absolute cursor-move transition-shadow ${selectedId === 'text' ? 'z-50' : 'z-10'}`}
+        style={{
+          left: `${design.textPosition.x}%`,
+          top: `${design.textPosition.y}%`,
+          transform: `translate(-50%, -50%)`,
+        }}
+        onMouseDown={(e) => handleMouseDown(e, 'text')}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div 
+          className={`relative group/text p-4 rounded-lg border-2 transition-all ${selectedId === 'text' ? 'border-amber-500 bg-amber-500/10' : 'border-transparent hover:border-amber-500/30'}`}
+        >
           <h2 
             style={{ 
               fontFamily: design.fontFamily, 
@@ -100,10 +115,28 @@ const SignCanvas = ({ design, id, onUpdateDecoration, onRemoveDecoration }: Sign
               mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal',
               filter: 'contrast(1.1) brightness(0.85) drop-shadow(0px 2px 2px rgba(0,0,0,0.3))'
             }}
-            className="text-center leading-tight select-none font-bold tracking-tight"
+            className="text-center leading-tight select-none font-bold tracking-tight whitespace-nowrap"
           >
             {design.text || "Your Text Here"}
           </h2>
+
+          {/* Text Controls UI */}
+          {selectedId === 'text' && (
+            <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto">
+              <div className="flex items-center gap-2 px-2">
+                <Maximize size={12} className="text-amber-200/60" />
+                <div className="w-32">
+                  <Slider 
+                    value={[design.fontSize]} 
+                    min={10} 
+                    max={200} 
+                    step={1}
+                    onValueChange={([val]) => onUpdateDesign?.({ fontSize: val })}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -138,7 +171,7 @@ const SignCanvas = ({ design, id, onUpdateDecoration, onRemoveDecoration }: Sign
                 {dec.content}
               </span>
 
-              {/* Controls UI */}
+              {/* Decoration Controls UI */}
               {isSelected && (
                 <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto">
                   <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
@@ -159,13 +192,6 @@ const SignCanvas = ({ design, id, onUpdateDecoration, onRemoveDecoration }: Sign
                   >
                     <Trash2 size={14} />
                   </button>
-                </div>
-              )}
-              
-              {/* Drag Handle Indicator */}
-              {isSelected && (
-                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-amber-400 font-bold uppercase tracking-widest whitespace-nowrap">
-                  Dragging
                 </div>
               )}
             </div>
