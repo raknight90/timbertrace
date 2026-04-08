@@ -154,12 +154,12 @@ const SignCanvas = ({
   const engravingStyle = {
     color: design.fontColor,
     textShadow: `
-      0px -1px 1px rgba(0,0,0,0.8),
-      0px 1px 1px rgba(255,255,255,0.15),
-      inset 0px 2px 4px rgba(0,0,0,0.5)
+      -1px -1px 1px rgba(0,0,0,0.6), 
+      1px 1px 1px rgba(255,255,255,0.1),
+      0px 1px 2px rgba(0,0,0,0.8)
     `,
     mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal' as any,
-    filter: 'contrast(1.1) brightness(0.9) drop-shadow(0px 1px 1px rgba(0,0,0,0.2))'
+    filter: 'contrast(1.2) brightness(0.85) drop-shadow(0px 1px 0px rgba(255,255,255,0.05))'
   };
 
   return (
