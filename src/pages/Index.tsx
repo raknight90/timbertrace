@@ -8,7 +8,7 @@ import DecorationPicker from '@/components/DecorationPicker';
 import DesignLibrary from '@/components/DesignLibrary';
 import { showSuccess, showError } from '@/utils/toast';
 import html2canvas from 'html2canvas';
-import { Hammer, Plus, Undo2, Redo2, Grid3X3, Printer, ZoomIn, ZoomOut, Search } from 'lucide-react';
+import { Hammer, Plus, Undo2, Redo2, Grid3X3, Printer, ZoomIn, ZoomOut } from 'lucide-react';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -113,8 +113,6 @@ const Index = () => {
   const handleUpdateDesign = (updates: Partial<EngravingDesign>) => {
     const updated = { ...currentDesign, ...updates };
     setCurrentDesign(updated);
-    // Only add to history if it's not a "transient" update like typing a name
-    // or if we want to debounced history for dimensions
     addToHistory(updated);
   };
 
@@ -495,7 +493,7 @@ const Index = () => {
 
       <main className="container mx-auto px-6 py-10 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar no-print">
+          <div className="lg:col-span-3 space-y-6 lg:sticky lg:top-24 h-fit max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 custom-scrollbar no-print">
             <DesignToolbar 
               design={currentDesign} 
               isExisting={isExistingInLibrary}
@@ -519,32 +517,37 @@ const Index = () => {
             />
           </div>
 
-          <div className="lg:col-span-8 flex flex-col items-center justify-start pt-4 lg:sticky lg:top-24">
-            <div className="w-full overflow-auto custom-scrollbar max-h-[calc(100vh-12rem)] p-4 bg-black/10 rounded-2xl border border-amber-900/5">
-              <div className="mb-6 flex items-center justify-between w-full max-w-[800px] mx-auto no-print">
+          <div className="lg:col-span-9 flex flex-col items-center justify-start pt-4 lg:sticky lg:top-24">
+            <div className="w-full overflow-auto custom-scrollbar max-h-[calc(100vh-12rem)] p-8 bg-black/10 rounded-2xl border border-amber-900/5">
+              <div className="mb-6 flex items-center justify-between w-full max-w-[1000px] mx-auto no-print">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">
                   {isPrintMode ? "Print Ready Mode Active" : (showGrid ? "Grid Snapping Active" : "Drag elements to position")}
                 </div>
               </div>
               
-              <div id="sign-preview-wrapper" className="flex justify-center w-full transition-transform duration-200 ease-out origin-top" style={{ transform: `scale(${zoom})` }}>
-                <SignCanvas 
-                  design={currentDesign} 
-                  id="sign-preview" 
-                  showGrid={showGrid}
-                  snapToGrid={snapToGrid}
-                  isPrintMode={isPrintMode}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                  onUpdateDesign={handleUpdateDesign}
-                  onUpdateText={handleUpdateText}
-                  onUpdateDecoration={handleUpdateDecoration}
-                  onRemoveText={handleRemoveText}
-                  onRemoveDecoration={handleRemoveDecoration}
-                  onDuplicateDecoration={handleDuplicateDecoration}
-                  onBringToFront={handleBringToFront}
-                />
+              <div id="sign-preview-wrapper" className="flex justify-center w-full min-w-fit">
+                <div 
+                  className="transition-transform duration-200 ease-out origin-top" 
+                  style={{ transform: `scale(${zoom})` }}
+                >
+                  <SignCanvas 
+                    design={currentDesign} 
+                    id="sign-preview" 
+                    showGrid={showGrid}
+                    snapToGrid={snapToGrid}
+                    isPrintMode={isPrintMode}
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                    onUpdateDesign={handleUpdateDesign}
+                    onUpdateText={handleUpdateText}
+                    onUpdateDecoration={handleUpdateDecoration}
+                    onRemoveText={handleRemoveText}
+                    onRemoveDecoration={handleRemoveDecoration}
+                    onDuplicateDecoration={handleDuplicateDecoration}
+                    onBringToFront={handleBringToFront}
+                  />
+                </div>
               </div>
             </div>
           </div>

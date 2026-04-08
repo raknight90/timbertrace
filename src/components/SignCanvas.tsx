@@ -57,8 +57,8 @@ const SignCanvas = ({
   let displayWidth = design.width * ppi;
   let displayHeight = design.height * ppi;
 
-  const maxWidth = 800;
-  const maxHeight = 500;
+  const maxWidth = 1000;
+  const maxHeight = 600;
 
   if (displayWidth > maxWidth || displayHeight > maxHeight) {
     const scale = Math.min(maxWidth / displayWidth, maxHeight / displayHeight);
