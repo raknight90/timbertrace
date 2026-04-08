@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { EngravingDesign, WoodMaterial, Decoration } from '@/types/engraving';
-import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter } from 'lucide-react';
+import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter, RotateCw, FlipHorizontal, FlipVertical, Layers } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 const WOOD_COLORS: Record<WoodMaterial, string> = {
@@ -19,6 +19,7 @@ interface SignCanvasProps {
   onUpdateDecoration?: (id: string, updates: Partial<Decoration>) => void;
   onRemoveDecoration?: (id: string) => void;
   onDuplicateDecoration?: (id: string) => void;
+  onBringToFront?: (id: string) => void;
 }
 
 const SignCanvas = ({ 
@@ -27,7 +28,8 @@ const SignCanvas = ({
   onUpdateDesign, 
   onUpdateDecoration, 
   onRemoveDecoration,
-  onDuplicateDecoration
+  onDuplicateDecoration,
+  onBringToFront
 }: SignCanvasProps) => {
   const [selectedId, setSelectedId] = useState<string | 'text' | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -167,7 +169,7 @@ const SignCanvas = ({
           style={{
             left: `${design.textPosition.x}%`,
             top: `${design.textPosition.y}%`,
-            transform: `translate(-50%, -50%)`,
+            transform: `translate(-50%, -50%) rotate(${design.textRotation}deg)`,
           }}
           onMouseDown={(e) => handleMouseDown(e, 'text')}
           onClick={(e) => e.stopPropagation()}
@@ -190,13 +192,25 @@ const SignCanvas = ({
               <div className={`absolute ${design.textPosition.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
                 <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
                   <Maximize size={12} className="text-amber-200/60" />
-                  <div className="w-32">
+                  <div className="w-24">
                     <Slider 
                       value={[design.fontSize]} 
                       min={10} 
                       max={200} 
                       step={1}
                       onValueChange={([val]) => onUpdateDesign?.({ fontSize: val })}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
+                  <RotateCw size={12} className="text-amber-200/60" />
+                  <div className="w-24">
+                    <Slider 
+                      value={[design.textRotation]} 
+                      min={0} 
+                      max={360} 
+                      step={1}
+                      onValueChange={([val]) => onUpdateDesign?.({ textRotation: val })}
                     />
                   </div>
                 </div>
@@ -231,7 +245,7 @@ const SignCanvas = ({
               style={{
                 left: `${dec.position.x}%`,
                 top: `${dec.position.y}%`,
-                transform: `translate(-50%, -50%)`,
+                transform: `translate(-50%, -50%) rotate(${dec.rotation}deg) scaleX(${dec.flipX ? -1 : 1}) scaleY(${dec.flipY ? -1 : 1})`,
               }}
               onMouseDown={(e) => handleMouseDown(e, dec.id)}
               onClick={(e) => e.stopPropagation()}
@@ -267,7 +281,7 @@ const SignCanvas = ({
                   <div className={`absolute ${dec.position.y < 20 ? 'top-full mt-4' : '-top-12'} left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto`}>
                     <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
                       <Maximize size={12} className="text-amber-200/60" />
-                      <div className="w-24">
+                      <div className="w-20">
                         <Slider 
                           value={[dec.scale]} 
                           min={0.1} 
@@ -277,29 +291,50 @@ const SignCanvas = ({
                         />
                       </div>
                     </div>
+                    <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
+                      <RotateCw size={12} className="text-amber-200/60" />
+                      <div className="w-20">
+                        <Slider 
+                          value={[dec.rotation]} 
+                          min={0} 
+                          max={360} 
+                          step={1}
+                          onValueChange={([val]) => onUpdateDecoration?.(dec.id, { rotation: val })}
+                        />
+                      </div>
+                    </div>
                     <div className="flex items-center gap-1 px-1 border-r border-amber-900/30">
                       <button 
-                        onClick={() => onUpdateDecoration?.(dec.id, { position: { ...dec.position, x: 50 } })}
-                        className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
-                        title="Center Horizontally"
+                        onClick={() => onUpdateDecoration?.(dec.id, { flipX: !dec.flipX })}
+                        className={`p-1.5 rounded-full transition-colors ${dec.flipX ? 'bg-amber-500 text-black' : 'hover:bg-amber-900/40 text-amber-400'}`}
+                        title="Flip Horizontal"
                       >
-                        <AlignCenter size={14} />
+                        <FlipHorizontal size={14} />
                       </button>
                       <button 
-                        onClick={() => onUpdateDecoration?.(dec.id, { position: { ...dec.position, y: 50 } })}
-                        className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
-                        title="Center Vertically"
+                        onClick={() => onUpdateDecoration?.(dec.id, { flipY: !dec.flipY })}
+                        className={`p-1.5 rounded-full transition-colors ${dec.flipY ? 'bg-amber-500 text-black' : 'hover:bg-amber-900/40 text-amber-400'}`}
+                        title="Flip Vertical"
                       >
-                        <AlignVerticalJustifyCenter size={14} />
+                        <FlipVertical size={14} />
                       </button>
                     </div>
-                    <button 
-                      onClick={() => onDuplicateDecoration?.(dec.id)}
-                      className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
-                      title="Duplicate"
-                    >
-                      <Copy size={14} />
-                    </button>
+                    <div className="flex items-center gap-1 px-1 border-r border-amber-900/30">
+                      <button 
+                        onClick={() => onBringToFront?.(dec.id)}
+                        className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
+                        title="Bring to Front"
+                      >
+                        <Layers size={14} />
+                      </button>
+                      <button 
+                        onClick={() => onDuplicateDecoration?.(dec.id)}
+                        className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"
+                        title="Duplicate"
+                      >
+                        <Copy size={14} />
+                      </button>
+                    </div>
                     <button 
                       onClick={() => onRemoveDecoration?.(dec.id)}
                       className="p-1.5 hover:bg-red-900/40 rounded-full text-red-400 transition-colors"

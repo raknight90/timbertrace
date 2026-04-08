@@ -25,6 +25,7 @@ const DEFAULT_DESIGN: EngravingDesign = {
   material: 'walnut',
   decorations: [],
   textPosition: { x: 50, y: 50 },
+  textRotation: 0,
   createdAt: Date.now(),
 };
 
@@ -39,7 +40,12 @@ const Index = () => {
         const parsed = JSON.parse(saved);
         const migrated = parsed.map((d: any) => ({
           ...d,
-          textPosition: d.textPosition || { x: 50, y: 50 }
+          textPosition: d.textPosition || { x: 50, y: 50 },
+          textRotation: d.textRotation || 0,
+          decorations: (d.decorations || []).map((dec: any) => ({
+            ...dec,
+            rotation: dec.rotation || 0
+          }))
         }));
         setLibrary(migrated);
       } catch (e) {
@@ -73,6 +79,7 @@ const Index = () => {
       content,
       position: { x: 50, y: 50 },
       scale: 1,
+      rotation: 0,
     };
     setCurrentDesign(prev => ({
       ...prev,
@@ -90,6 +97,7 @@ const Index = () => {
       src,
       position: { x: 50, y: 50 },
       scale: 1,
+      rotation: 0,
     };
     setCurrentDesign(prev => ({
       ...prev,
@@ -120,6 +128,19 @@ const Index = () => {
       ...prev,
       decorations: prev.decorations.map(d => d.id === id ? { ...d, ...updates } : d)
     }));
+  };
+
+  const handleBringToFront = (id: string) => {
+    setCurrentDesign(prev => {
+      const dec = prev.decorations.find(d => d.id === id);
+      if (!dec) return prev;
+      const others = prev.decorations.filter(d => d.id !== id);
+      return {
+        ...prev,
+        decorations: [...others, dec]
+      };
+    });
+    showSuccess("Moved to front");
   };
 
   const handleRemoveDecoration = (id: string) => {
@@ -243,6 +264,7 @@ const Index = () => {
                   onUpdateDecoration={handleUpdateDecoration}
                   onRemoveDecoration={handleRemoveDecoration}
                   onDuplicateDecoration={handleDuplicateDecoration}
+                  onBringToFront={handleBringToFront}
                 />
               </div>
             </div>
