@@ -26,7 +26,6 @@ const DEFAULT_DESIGN: EngravingDesign = {
   material: 'walnut',
   decorations: [],
   textPosition: { x: 50, y: 50 },
-  textRotation: 0,
   createdAt: Date.now(),
 };
 

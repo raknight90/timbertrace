@@ -240,7 +240,7 @@ const SignCanvas = ({
           style={{
             left: `${design.textPosition.x}%`,
             top: `${design.textPosition.y}%`,
-            transform: `translate(-50%, -50%) rotate(${design.textRotation}deg)`,
+            transform: `translate(-50%, -50%)`,
           }}
           onMouseDown={(e) => handleMouseDown(e, 'text')}
           onClick={(e) => e.stopPropagation()}
@@ -271,18 +271,6 @@ const SignCanvas = ({
                       max={200} 
                       step={1}
                       onValueChange={([val]) => onUpdateDesign?.({ fontSize: val })}
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
-                  <RotateCw size={12} className="text-amber-200/60" />
-                  <div className="w-24">
-                    <Slider 
-                      value={[design.textRotation]} 
-                      min={0} 
-                      max={360} 
-                      step={1}
-                      onValueChange={([val]) => onUpdateDesign?.({ textRotation: val })}
                     />
                   </div>
                 </div>
