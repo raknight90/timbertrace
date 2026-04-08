@@ -1,7 +1,9 @@
 "use client";
 
-import React from 'react';
-import { EngravingDesign, WoodMaterial } from '@/types/engraving';
+import React, { useState, useRef, useEffect } from 'react';
+import { EngravingDesign, WoodMaterial, Decoration } from '@/types/engraving';
+import { Trash2, Move, Maximize } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 
 const WOOD_COLORS: Record<WoodMaterial, string> = {
   walnut: "#3d2b1f",
@@ -13,21 +15,59 @@ const WOOD_COLORS: Record<WoodMaterial, string> = {
 interface SignCanvasProps {
   design: EngravingDesign;
   id?: string;
+  onUpdateDecoration?: (id: string, updates: Partial<Decoration>) => void;
+  onRemoveDecoration?: (id: string) => void;
 }
 
-const SignCanvas = ({ design, id }: SignCanvasProps) => {
+const SignCanvas = ({ design, id, onUpdateDecoration, onRemoveDecoration }: SignCanvasProps) => {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
   const aspectRatio = design.width / design.height;
-  
+
+  const handleMouseDown = (e: React.MouseEvent, decId: string) => {
+    e.stopPropagation();
+    setSelectedId(decId);
+    setIsDragging(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !selectedId || !canvasRef.current || !onUpdateDecoration) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    // Constrain to canvas
+    const constrainedX = Math.max(0, Math.min(100, x));
+    const constrainedY = Math.max(0, Math.min(100, y));
+
+    onUpdateDecoration(selectedId, { position: { x: constrainedX, y: constrainedY } });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => window.removeEventListener('mouseup', handleMouseUp);
+    }
+  }, [isDragging]);
+
   return (
     <div 
+      ref={canvasRef}
       id={id}
-      className="relative overflow-hidden rounded-sm transition-all duration-700 ease-in-out group"
+      onClick={() => setSelectedId(null)}
+      onMouseMove={handleMouseMove}
+      className="relative overflow-hidden rounded-sm transition-all duration-700 ease-in-out group cursor-default"
       style={{
         aspectRatio: `${aspectRatio}`,
         width: '100%',
         maxWidth: '800px',
         backgroundColor: WOOD_COLORS[design.material],
-        // Physical board effect: Beveled edges and heavy shadow
         boxShadow: `
           0 20px 50px rgba(0,0,0,0.6),
           inset 0 0 2px rgba(255,255,255,0.2),
@@ -36,23 +76,22 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
         border: '1px solid rgba(0,0,0,0.3)'
       }}
     >
-      {/* Realistic Wood Grain Overlay - adds tactile texture */}
+      {/* Realistic Wood Grain Overlay */}
       <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] mix-blend-overlay" />
       
-      {/* Lighting: Top-down light source for the board */}
+      {/* Lighting */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.15)_0%,transparent_70%)] pointer-events-none" />
 
       {/* Engraving Effect Container */}
-      <div className="absolute inset-0 flex items-center justify-center p-12">
+      <div className="absolute inset-0 flex items-center justify-center p-12 pointer-events-none">
         <div className="relative w-full h-full flex items-center justify-center">
-          {/* Main Text with "Deep Carved" effect */}
+          {/* Main Text */}
           <h2 
             style={{ 
               fontFamily: design.fontFamily, 
               fontSize: `${design.fontSize}px`,
               color: design.fontColor,
-              // The "Carved" look:
               textShadow: `
                 0px -2px 1px rgba(0,0,0,0.9),
                 0px 1px 1px rgba(255,255,255,0.2),
@@ -65,30 +104,77 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
           >
             {design.text || "Your Text Here"}
           </h2>
-
-          {/* Decorations with similar carved effect */}
-          {design.decorations.map((dec) => (
-            <div 
-              key={dec.id}
-              className="absolute"
-              style={{
-                left: `${dec.position.x}%`,
-                top: `${dec.position.y}%`,
-                transform: `translate(-50%, -50%) scale(${dec.scale})`,
-                color: design.fontColor,
-                textShadow: '0px -1px 1px rgba(0,0,0,0.8), 0px 1px 1px rgba(255,255,255,0.1)',
-                mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal',
-                filter: 'brightness(0.8)'
-              }}
-            >
-              <span className="text-5xl">{dec.content}</span>
-            </div>
-          ))}
         </div>
       </div>
 
+      {/* Decorations Layer */}
+      {design.decorations.map((dec) => {
+        const isSelected = selectedId === dec.id;
+        return (
+          <div 
+            key={dec.id}
+            className={`absolute cursor-move transition-shadow ${isSelected ? 'z-50' : 'z-10'}`}
+            style={{
+              left: `${dec.position.x}%`,
+              top: `${dec.position.y}%`,
+              transform: `translate(-50%, -50%)`,
+            }}
+            onMouseDown={(e) => handleMouseDown(e, dec.id)}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div 
+              className={`relative group/dec p-4 rounded-lg border-2 transition-all ${isSelected ? 'border-amber-500 bg-amber-500/10' : 'border-transparent hover:border-amber-500/30'}`}
+            >
+              <span 
+                className="text-5xl select-none block"
+                style={{
+                  color: design.fontColor,
+                  transform: `scale(${dec.scale})`,
+                  textShadow: '0px -1px 1px rgba(0,0,0,0.8), 0px 1px 1px rgba(255,255,255,0.1)',
+                  mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal',
+                  filter: 'brightness(0.8)'
+                }}
+              >
+                {dec.content}
+              </span>
+
+              {/* Controls UI */}
+              {isSelected && (
+                <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/90 backdrop-blur-md p-2 rounded-full border border-amber-900/50 shadow-xl pointer-events-auto">
+                  <div className="flex items-center gap-2 px-2 border-r border-amber-900/30">
+                    <Maximize size={12} className="text-amber-200/60" />
+                    <div className="w-24">
+                      <Slider 
+                        value={[dec.scale]} 
+                        min={0.5} 
+                        max={3} 
+                        step={0.1}
+                        onValueChange={([val]) => onUpdateDecoration?.(dec.id, { scale: val })}
+                      />
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => onRemoveDecoration?.(dec.id)}
+                    className="p-1.5 hover:bg-red-900/40 rounded-full text-red-400 transition-colors"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              )}
+              
+              {/* Drag Handle Indicator */}
+              {isSelected && (
+                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-amber-400 font-bold uppercase tracking-widest whitespace-nowrap">
+                  Dragging
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+
       {/* Measurement Labels */}
-      <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md px-4 py-1.5 rounded-full text-[11px] text-amber-100 font-mono border border-amber-900/50 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md px-4 py-1.5 rounded-full text-[11px] text-amber-100 font-mono border border-amber-900/50 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
         {design.width}" x {design.height}" • {design.material.toUpperCase()}
       </div>
     </div>

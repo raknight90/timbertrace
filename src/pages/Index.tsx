@@ -67,6 +67,21 @@ const Index = () => {
     showSuccess("Decoration added!");
   };
 
+  const handleUpdateDecoration = (id: string, updates: Partial<Decoration>) => {
+    setCurrentDesign(prev => ({
+      ...prev,
+      decorations: prev.decorations.map(d => d.id === id ? { ...d, ...updates } : d)
+    }));
+  };
+
+  const handleRemoveDecoration = (id: string) => {
+    setCurrentDesign(prev => ({
+      ...prev,
+      decorations: prev.decorations.filter(d => d.id !== id)
+    }));
+    showSuccess("Decoration removed");
+  };
+
   const handleSaveToLibrary = () => {
     const newDesign = {
       ...currentDesign,
@@ -163,22 +178,27 @@ const Index = () => {
           <div className="lg:col-span-8 flex flex-col items-center justify-start pt-4">
             <div className="w-full sticky top-28">
               <div className="mb-6 flex items-center justify-between w-full max-w-[800px]">
-                <h2 className="text-lg font-medium text-amber-200/80">Live Preview</h2>
+                <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="flex gap-4 text-xs text-amber-200/40">
-                  <span>Scale: 1:1 (Digital)</span>
+                  <span>Click decorations to move/resize</span>
                   <span>Wood Type: {currentDesign.material.toUpperCase()}</span>
                 </div>
               </div>
               
               <div className="flex justify-center w-full">
-                <SignCanvas design={currentDesign} id="sign-preview" />
+                <SignCanvas 
+                  design={currentDesign} 
+                  id="sign-preview" 
+                  onUpdateDecoration={handleUpdateDecoration}
+                  onRemoveDecoration={handleRemoveDecoration}
+                />
               </div>
 
               <div className="mt-12 p-6 rounded-xl bg-black/40 backdrop-blur-sm border border-amber-900/20 max-w-[800px] w-full">
-                <h3 className="text-sm font-semibold text-amber-200 mb-2 uppercase tracking-wider">Pro Tip</h3>
+                <h3 className="text-sm font-semibold text-amber-200 mb-2 uppercase tracking-wider">Editor Controls</h3>
                 <p className="text-sm text-amber-200/60 leading-relaxed">
-                  When exporting for CNC or laser engraving, ensure your font size is large enough for the bit or beam width. 
-                  The PDF export maintains the aspect ratio of your physical sign dimensions.
+                  Drag decorations to reposition them. When a decoration is selected, use the handles to resize or the trash icon to remove it. 
+                  All elements will maintain the chosen fill color for the final template.
                 </p>
               </div>
             </div>
