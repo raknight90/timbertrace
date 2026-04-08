@@ -6,14 +6,44 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Palette, Upload, Image as ImageIcon } from 'lucide-react';
 
 const DECORATIONS = [
+  // Nature & Icons
   { id: 'leaf-1', content: '🌿', name: 'Leaf' },
   { id: 'flower-1', content: '🌸', name: 'Flower' },
   { id: 'star-1', content: '✨', name: 'Sparkle' },
+  { id: 'pine-1', content: '🌲', name: 'Pine' },
+  { id: 'deer-1', content: '🦌', name: 'Deer' },
+  { id: 'anchor-1', content: '⚓', name: 'Anchor' },
+  { id: 'mountain-1', content: '🏔️', name: 'Mountain' },
+  { id: 'sun-1', content: '☀️', name: 'Sun' },
+  
+  // Flourishes & Scrolls
+  { id: 'flourish-1', content: '⚜', name: 'Fleur-de-lis' },
+  { id: 'flourish-2', content: '❦', name: 'Floral Heart' },
+  { id: 'flourish-3', content: '❧', name: 'Vine' },
+  { id: 'scroll-1', content: '🙘', name: 'Scroll Left' },
+  { id: 'scroll-2', content: '🙙', name: 'Scroll Right' },
+  { id: 'scroll-3', content: '🙚', name: 'Ornate Scroll' },
+  { id: 'scroll-4', content: '🙛', name: 'Fancy Scroll' },
+  { id: 'scroll-5', content: '🙜', name: 'Leafy Scroll' },
+  { id: 'scroll-6', content: '🙝', name: 'Vine Scroll' },
+  
+  // Borders & Lines
   { id: 'border-1', content: '◈', name: 'Diamond' },
-  { id: 'border-2', content: '❧', name: 'Vine' },
-  { id: 'border-3', content: '⚓', name: 'Anchor' },
-  { id: 'border-4', content: '🌲', name: 'Pine' },
-  { id: 'border-5', content: '🦌', name: 'Deer' },
+  { id: 'border-2', content: '❖', name: 'Fancy Diamond' },
+  { id: 'border-3', content: '✥', name: 'Cross' },
+  { id: 'border-4', content: '═', name: 'Double Line' },
+  { id: 'border-5', content: '🙤', name: 'Ornate Line' },
+  { id: 'border-6', content: '🙥', name: 'Fancy Line' },
+  { id: 'border-7', content: '🙦', name: 'Scroll Line' },
+  { id: 'border-8', content: '🙧', name: 'Vine Line' },
+  
+  // Corners
+  { id: 'corner-1', content: '╔', name: 'Top Left' },
+  { id: 'corner-2', content: '╗', name: 'Top Right' },
+  { id: 'corner-3', content: '╚', name: 'Bottom Left' },
+  { id: 'corner-4', content: '╝', name: 'Bottom Right' },
+  { id: 'corner-5', content: '🙐', name: 'Fancy Corner' },
+  { id: 'corner-6', content: '🙑', name: 'Ornate Corner' },
 ];
 
 interface DecorationPickerProps {
@@ -62,7 +92,7 @@ const DecorationPicker = ({ onAdd, onAddImage }: DecorationPickerProps) => {
         />
       </div>
       
-      <ScrollArea className="h-[150px] pr-4">
+      <ScrollArea className="h-[250px] pr-4">
         <div className="grid grid-cols-4 gap-3">
           {DECORATIONS.map((dec) => (
             <button
@@ -71,7 +101,7 @@ const DecorationPicker = ({ onAdd, onAddImage }: DecorationPickerProps) => {
               className="h-12 w-12 flex items-center justify-center bg-black/20 border border-amber-900/30 rounded-lg hover:bg-amber-900/40 hover:border-amber-500 transition-all text-2xl"
               title={dec.name}
             >
-              {dec.content}
+              <span className="select-none">{dec.content}</span>
             </button>
           ))}
         </div>
