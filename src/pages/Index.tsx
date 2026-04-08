@@ -20,6 +20,7 @@ const DEFAULT_DESIGN: EngravingDesign = {
   text: 'THE SMITHS',
   fontFamily: "'Playfair Display', serif",
   fontSize: 80,
+  fontColor: 'rgba(20, 10, 5, 0.9)',
   material: 'walnut',
   decorations: [],
   createdAt: Date.now(),

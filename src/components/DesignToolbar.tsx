@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Palette, Save, Download, Trees } from 'lucide-react';
+import { Type, Maximize2, Palette, Save, Download, Trees, Paintbrush } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -22,6 +22,15 @@ const MATERIALS: { name: string; value: WoodMaterial }[] = [
   { name: 'Light Oak', value: 'oak' },
   { name: 'Cherry Wood', value: 'cherry' },
   { name: 'Reclaimed Pine', value: 'pine' },
+];
+
+const COLORS = [
+  { name: 'Natural Carved', value: 'rgba(20, 10, 5, 0.9)' },
+  { name: 'Charcoal Black', value: '#1a1a1a' },
+  { name: 'Antique White', value: '#f5f5f0' },
+  { name: 'Metallic Gold', value: '#d4af37' },
+  { name: 'Metallic Silver', value: '#c0c0c0' },
+  { name: 'Barn Red', value: '#7c0a02' },
 ];
 
 interface DesignToolbarProps {
@@ -87,7 +96,7 @@ const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProp
         </div>
       </div>
 
-      {/* Text Content */}
+      {/* Text Content & Color */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-amber-200">
           <Type size={18} />
@@ -101,23 +110,47 @@ const DesignToolbar = ({ design, onUpdate, onSave, onExport }: DesignToolbarProp
             className="bg-black/20 border-amber-900/50 focus:ring-amber-500 text-lg py-6"
           />
           
-          <div className="space-y-2">
-            <Label className="text-xs text-amber-200/60">Font Style</Label>
-            <Select 
-              value={design.fontFamily} 
-              onValueChange={(val) => onUpdate({ fontFamily: val })}
-            >
-              <SelectTrigger className="bg-black/20 border-amber-900/50">
-                <SelectValue placeholder="Select Font" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
-                {FONTS.map(font => (
-                  <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
-                    {font.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-amber-200/60">Font Style</Label>
+              <Select 
+                value={design.fontFamily} 
+                onValueChange={(val) => onUpdate({ fontFamily: val })}
+              >
+                <SelectTrigger className="bg-black/20 border-amber-900/50">
+                  <SelectValue placeholder="Select Font" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
+                  {FONTS.map(font => (
+                    <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                      {font.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs text-amber-200/60">Fill Color</Label>
+              <Select 
+                value={design.fontColor} 
+                onValueChange={(val) => onUpdate({ fontColor: val })}
+              >
+                <SelectTrigger className="bg-black/20 border-amber-900/50">
+                  <SelectValue placeholder="Select Color" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
+                  {COLORS.map(color => (
+                    <SelectItem key={color.value} value={color.value}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: color.value }} />
+                        {color.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="space-y-2">

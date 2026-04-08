@@ -45,17 +45,16 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
             style={{ 
               fontFamily: design.fontFamily, 
               fontSize: `${design.fontSize}px`,
+              color: design.fontColor,
               // The "Carved" look:
-              // 1. Dark color for the "burnt" or "shadowed" interior
-              color: 'rgba(20, 10, 5, 0.9)',
-              // 2. Multiple shadows to create depth and a highlight on the edge
+              // Multiple shadows to create depth and a highlight on the edge
               textShadow: `
                 -1px -1px 1px rgba(0,0,0,0.8), 
                 1px 1px 1px rgba(255,255,255,0.15),
                 inset 0 2px 4px rgba(0,0,0,0.5)
               `,
-              // 3. Blend mode to let some grain show through
-              mixBlendMode: 'multiply',
+              // Blend mode to let some grain show through if it's a dark color
+              mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal',
               filter: 'contrast(1.1) brightness(0.9)'
             }}
             className="text-center leading-tight select-none font-bold"
@@ -72,9 +71,9 @@ const SignCanvas = ({ design, id }: SignCanvasProps) => {
                 left: `${dec.position.x}%`,
                 top: `${dec.position.y}%`,
                 transform: `translate(-50%, -50%) scale(${dec.scale})`,
-                color: 'rgba(20, 10, 5, 0.85)',
+                color: design.fontColor,
                 textShadow: '-1px -1px 1px rgba(0,0,0,0.7), 1px 1px 1px rgba(255,255,255,0.1)',
-                mixBlendMode: 'multiply',
+                mixBlendMode: design.fontColor.startsWith('rgba') ? 'multiply' : 'normal',
               }}
             >
               <span className="text-5xl">{dec.content}</span>
