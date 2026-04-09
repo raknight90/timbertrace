@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Trees, Space, FileText, Save, RefreshCw, Plus, Upload } from 'lucide-react';
+import { Type, Maximize2, Trees, Space, FileText, Save, RefreshCw, Plus, Upload, Palette } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
 
 const INITIAL_FONTS = [
@@ -262,7 +262,19 @@ const DesignToolbar = ({
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs text-amber-200/60">Fill Color</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-amber-200/60">Fill Color</Label>
+                  <div className="relative flex items-center">
+                    <input 
+                      type="color" 
+                      value={selectedText.fontColor.startsWith('#') ? selectedText.fontColor : '#1a1a1a'}
+                      onChange={(e) => onUpdateText(selectedText.id, { fontColor: e.target.value })}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      title="Custom Color Picker"
+                    />
+                    <Palette size={12} className="text-amber-400" />
+                  </div>
+                </div>
                 <Select 
                   value={selectedText.fontColor} 
                   onValueChange={(val) => onUpdateText(selectedText.id, { fontColor: val })}
@@ -279,6 +291,14 @@ const DesignToolbar = ({
                         </div>
                       </SelectItem>
                     ))}
+                    {!COLORS.some(c => c.value === selectedText.fontColor) && (
+                      <SelectItem value={selectedText.fontColor}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full border border-white/10" style={{ backgroundColor: selectedText.fontColor }} />
+                          Custom Color
+                        </div>
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
