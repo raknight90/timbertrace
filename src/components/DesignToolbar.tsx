@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Trees, Space, FileText, Save, RefreshCw, Plus, Upload, Palette } from 'lucide-react';
+import { Type, Maximize2, Trees, Space, FileText, Save, RefreshCw, Plus, Upload, Palette, Paintbrush } from 'lucide-react';
 import { showSuccess, showError } from '@/utils/toast';
 
 const INITIAL_FONTS = [
@@ -43,6 +43,15 @@ const WOOD_TYPES: { name: string; value: WoodMaterial; color: string }[] = [
   { name: 'Cedar', value: 'cedar', color: '#c17f59' },
   { name: 'Ebony', value: 'ebony', color: '#1a1a1a' },
   { name: 'Birch', value: 'birch', color: '#fdf5e6' },
+];
+
+const PAINT_COLORS = [
+  { name: 'None (Natural)', value: 'transparent' },
+  { name: 'White Wash', value: 'rgba(255, 255, 255, 0.4)' },
+  { name: 'Slate Grey', value: 'rgba(71, 85, 105, 0.5)' },
+  { name: 'Navy Blue', value: 'rgba(30, 58, 138, 0.4)' },
+  { name: 'Forest Green', value: 'rgba(20, 83, 45, 0.4)' },
+  { name: 'Barn Red', value: 'rgba(153, 27, 27, 0.4)' },
 ];
 
 const COLORS = [
@@ -111,7 +120,6 @@ const DesignToolbar = ({
       const fontName = file.name.split('.')[0].replace(/[^a-zA-Z0-9]/g, '');
       const fontFamily = `CustomFont_${fontName}`;
 
-      // Inject @font-face into document
       const style = document.createElement('style');
       style.innerHTML = `
         @font-face {
@@ -121,7 +129,6 @@ const DesignToolbar = ({
       `;
       document.head.appendChild(style);
 
-      // Add to font list
       const newFont = { name: `Installed: ${file.name.split('.')[0]}`, value: `'${fontFamily}', sans-serif` };
       setFonts(prev => [newFont, ...prev]);
       
@@ -137,33 +144,83 @@ const DesignToolbar = ({
 
   return (
     <div className="bg-[#2a1a0a]/90 backdrop-blur-md border border-amber-900/30 p-6 rounded-xl shadow-xl space-y-8 text-amber-50">
-      {/* Wood Type Selection */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 text-amber-200">
-          <Trees size={18} />
-          <h3 className="font-semibold uppercase tracking-wider text-sm">Wood Type</h3>
+      {/* Wood Type & Paint Selection */}
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-amber-200">
+            <Trees size={18} />
+            <h3 className="font-semibold uppercase tracking-wider text-sm">Wood Type</h3>
+          </div>
+          <Select 
+            value={design.material} 
+            onValueChange={(val) => onUpdate({ material: val as WoodMaterial })}
+          >
+            <SelectTrigger className="bg-black/20 border-amber-900/50 text-amber-100">
+              <SelectValue placeholder="Select Wood Type" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
+              {WOOD_TYPES.map((wood) => (
+                <SelectItem key={wood.value} value={wood.value}>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full border border-white/10 shadow-sm" 
+                      style={{ backgroundColor: wood.color }} 
+                    />
+                    <span>{wood.name}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <Select 
-          value={design.material} 
-          onValueChange={(val) => onUpdate({ material: val as WoodMaterial })}
-        >
-          <SelectTrigger className="bg-black/20 border-amber-900/50 text-amber-100">
-            <SelectValue placeholder="Select Wood Type" />
-          </SelectTrigger>
-          <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
-            {WOOD_TYPES.map((wood) => (
-              <SelectItem key={wood.value} value={wood.value}>
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-3 h-3 rounded-full border border-white/10 shadow-sm" 
-                    style={{ backgroundColor: wood.color }} 
-                  />
-                  <span>{wood.name}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between text-amber-200">
+            <div className="flex items-center gap-2">
+              <Paintbrush size={18} />
+              <h3 className="font-semibold uppercase tracking-wider text-sm">Paint / Finish</h3>
+            </div>
+            <div className="relative flex items-center">
+              <input 
+                type="color" 
+                value={design.paintColor && design.paintColor !== 'transparent' ? design.paintColor : '#ffffff'}
+                onChange={(e) => onUpdate({ paintColor: e.target.value })}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                title="Custom Paint Color"
+              />
+              <Palette size={14} className="text-amber-400" />
+            </div>
+          </div>
+          <Select 
+            value={design.paintColor || 'transparent'} 
+            onValueChange={(val) => onUpdate({ paintColor: val })}
+          >
+            <SelectTrigger className="bg-black/20 border-amber-900/50 text-amber-100">
+              <SelectValue placeholder="Select Finish" />
+            </SelectTrigger>
+            <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
+              {PAINT_COLORS.map((paint) => (
+                <SelectItem key={paint.value} value={paint.value}>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full border border-white/10 shadow-sm" 
+                      style={{ backgroundColor: paint.value === 'transparent' ? 'white' : paint.value, opacity: paint.value === 'transparent' ? 0.2 : 1 }} 
+                    />
+                    <span>{paint.name}</span>
+                  </div>
+                </SelectItem>
+              ))}
+              {design.paintColor && !PAINT_COLORS.some(p => p.value === design.paintColor) && (
+                <SelectItem value={design.paintColor}>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full border border-white/10 shadow-sm" style={{ backgroundColor: design.paintColor }} />
+                    <span>Custom Color</span>
+                  </div>
+                </SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Dimensions */}

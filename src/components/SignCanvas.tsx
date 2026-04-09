@@ -298,6 +298,18 @@ const SignCanvas = ({
                 }}
               />
 
+              {/* Paint Overlay Layer */}
+              {design.paintColor && design.paintColor !== 'transparent' && (
+                <div 
+                  className="absolute inset-0 pointer-events-none transition-colors duration-300"
+                  style={{ 
+                    backgroundColor: design.paintColor,
+                    mixBlendMode: 'multiply',
+                    opacity: 0.8
+                  }}
+                />
+              )}
+
               <div className="absolute inset-0 pointer-events-none rounded-sm shadow-[inset_0_0_15px_rgba(0,0,0,0.7),inset_0_0_2px_rgba(0,0,0,0.9)]" />
               <div className="absolute inset-0 pointer-events-none rounded-sm border border-white/10 mix-blend-screen opacity-20" />
               <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/20 pointer-events-none" />

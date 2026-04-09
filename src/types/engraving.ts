@@ -29,6 +29,7 @@ export interface EngravingDesign {
   width: number;
   height: number;
   material: WoodMaterial;
+  paintColor?: string;
   textElements: TextElement[];
   decorations: Decoration[];
   createdAt: number;
