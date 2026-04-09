@@ -236,69 +236,64 @@ const SignCanvas = ({
           {!isPrintMode && (
             <>
               {/* Base Wood Texture Overlay */}
-              <div className="absolute inset-0 opacity-50 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
+              <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
               
-              {/* Defined Horizontal Grain Fibers */}
+              {/* Organic Sweeping Growth Rings (Radial) */}
               <div 
-                className="absolute inset-0 opacity-40 pointer-events-none mix-blend-multiply"
+                className="absolute inset-0 opacity-50 pointer-events-none mix-blend-overlay"
                 style={{
-                  backgroundImage: `repeating-linear-gradient(
-                    to bottom,
-                    transparent,
-                    transparent 1px,
-                    rgba(0,0,0,0.3) 1px,
-                    rgba(0,0,0,0.3) 2px,
-                    transparent 2px,
-                    transparent 4px
-                  )`,
-                  backgroundSize: '100% 4px'
+                  backgroundImage: `
+                    radial-gradient(ellipse at 50% -100%, transparent 0%, rgba(0,0,0,0.15) 40%, transparent 45%, rgba(0,0,0,0.1) 70%, transparent 75%),
+                    radial-gradient(ellipse at 20% 200%, transparent 0%, rgba(0,0,0,0.1) 30%, transparent 35%, rgba(0,0,0,0.15) 60%, transparent 65%),
+                    radial-gradient(ellipse at 80% -50%, transparent 0%, rgba(0,0,0,0.1) 20%, transparent 25%, rgba(0,0,0,0.1) 50%, transparent 55%)
+                  `,
+                  backgroundSize: '200% 200%'
                 }}
               />
 
-              {/* Strong Organic Horizontal Growth Rings */}
+              {/* Wavy Horizontal Fibers (Skewed) */}
               <div 
-                className="absolute inset-0 opacity-60 pointer-events-none mix-blend-overlay"
+                className="absolute inset-0 opacity-30 pointer-events-none mix-blend-multiply overflow-hidden"
+              >
+                <div 
+                  className="absolute inset-[-50%] rotate-[-1deg] skew-x-[2deg]"
+                  style={{
+                    backgroundImage: `repeating-linear-gradient(
+                      to bottom,
+                      transparent,
+                      transparent 2px,
+                      rgba(0,0,0,0.2) 2px,
+                      rgba(0,0,0,0.2) 4px,
+                      transparent 4px,
+                      transparent 8px
+                    )`,
+                    backgroundSize: '100% 8px'
+                  }}
+                />
+              </div>
+
+              {/* Random Knots and Dark Spots */}
+              <div 
+                className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply"
                 style={{
-                  backgroundImage: `linear-gradient(
-                    to bottom,
-                    transparent 0%,
-                    rgba(0,0,0,0.2) 5%,
-                    transparent 15%,
-                    rgba(0,0,0,0.1) 30%,
-                    transparent 45%,
-                    rgba(0,0,0,0.3) 60%,
-                    transparent 75%,
-                    rgba(0,0,0,0.1) 85%,
-                    transparent 100%
-                  )`,
-                  backgroundSize: '100% 150px'
+                  backgroundImage: `
+                    radial-gradient(ellipse at 30% 40%, rgba(0,0,0,0.4) 0%, transparent 10%),
+                    radial-gradient(ellipse at 70% 60%, rgba(0,0,0,0.3) 0%, transparent 8%),
+                    radial-gradient(ellipse at 15% 85%, rgba(0,0,0,0.4) 0%, transparent 12%)
+                  `
                 }}
               />
 
-              {/* Pronounced Horizontal Streaks */}
+              {/* Deep Grain Shadows (Non-linear) */}
               <div 
-                className="absolute inset-0 opacity-20 pointer-events-none mix-blend-screen"
+                className="absolute inset-0 opacity-25 pointer-events-none mix-blend-multiply"
                 style={{
-                  backgroundImage: `repeating-linear-gradient(
-                    to bottom,
-                    rgba(255,255,255,0.15) 0px,
-                    rgba(255,255,255,0.15) 2px,
-                    transparent 2px,
-                    transparent 30px
-                  )`
-                }}
-              />
-
-              {/* Deep Grain Shadows */}
-              <div 
-                className="absolute inset-0 opacity-30 pointer-events-none mix-blend-multiply"
-                style={{
-                  backgroundImage: `repeating-linear-gradient(
-                    to bottom,
+                  backgroundImage: `repeating-radial-gradient(
+                    circle at 50% -500%,
                     rgba(0,0,0,0.1) 0px,
                     rgba(0,0,0,0.1) 1px,
                     transparent 1px,
-                    transparent 10px
+                    transparent 15px
                   )`
                 }}
               />
