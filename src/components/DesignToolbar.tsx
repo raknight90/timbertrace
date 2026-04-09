@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Trees, Check, Space, FileText, Save, RefreshCw, Plus } from 'lucide-react';
+import { Type, Maximize2, Trees, Space, FileText, Save, RefreshCw, Plus } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -92,29 +92,27 @@ const DesignToolbar = ({
           <Trees size={18} />
           <h3 className="font-semibold uppercase tracking-wider text-sm">Wood Type</h3>
         </div>
-        <div className="grid grid-cols-3 gap-2">
-          {WOOD_TYPES.map((wood) => (
-            <button
-              key={wood.value}
-              onClick={() => onUpdate({ material: wood.value })}
-              className={`group relative h-10 rounded-lg border transition-all flex items-center px-2 gap-2 ${
-                design.material === wood.value 
-                  ? 'border-amber-500 bg-amber-500/10' 
-                  : 'border-amber-900/30 bg-black/20 hover:border-amber-700'
-              }`}
-              title={wood.name}
-            >
-              <div 
-                className="w-3 h-3 rounded-full border border-white/10 shadow-sm shrink-0" 
-                style={{ backgroundColor: wood.color }} 
-              />
-              <span className="text-[10px] font-medium text-amber-100 truncate">{wood.name}</span>
-              {design.material === wood.value && (
-                <Check size={10} className="text-amber-400 ml-auto shrink-0" />
-              )}
-            </button>
-          ))}
-        </div>
+        <Select 
+          value={design.material} 
+          onValueChange={(val) => onUpdate({ material: val as WoodMaterial })}
+        >
+          <SelectTrigger className="bg-black/20 border-amber-900/50 text-amber-100">
+            <SelectValue placeholder="Select Wood Type" />
+          </SelectTrigger>
+          <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
+            {WOOD_TYPES.map((wood) => (
+              <SelectItem key={wood.value} value={wood.value}>
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-3 h-3 rounded-full border border-white/10 shadow-sm" 
+                    style={{ backgroundColor: wood.color }} 
+                  />
+                  <span>{wood.name}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Dimensions */}
