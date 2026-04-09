@@ -234,75 +234,71 @@ const SignCanvas = ({
           />
           
           {!isPrintMode && (
-            <>
-              {/* Base Wood Texture Overlay */}
-              <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
+            <div className="absolute inset-0 pointer-events-none overflow-hidden filter contrast-[1.4] brightness-[0.9]">
+              {/* Base Noise/Fiber Layer */}
+              <div className="absolute inset-0 opacity-30 mix-blend-overlay bg-[url('https://www.transparenttextures.com/wood-pattern.png')]" />
               
-              {/* Organic Sweeping Growth Rings (Radial) */}
+              {/* Wavy Horizontal Grain Fibers */}
               <div 
-                className="absolute inset-0 opacity-50 pointer-events-none mix-blend-overlay"
+                className="absolute inset-[-50%] opacity-40 mix-blend-multiply rotate-[-1deg] skew-x-[3deg]"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(
+                    to bottom,
+                    transparent,
+                    transparent 2px,
+                    rgba(0,0,0,0.4) 2px,
+                    rgba(0,0,0,0.4) 4px,
+                    transparent 4px,
+                    transparent 8px
+                  )`,
+                  backgroundSize: '100% 8px'
+                }}
+              />
+
+              {/* Large Sweeping Growth Rings */}
+              <div 
+                className="absolute inset-0 opacity-50 mix-blend-overlay"
                 style={{
                   backgroundImage: `
-                    radial-gradient(ellipse at 50% -100%, transparent 0%, rgba(0,0,0,0.15) 40%, transparent 45%, rgba(0,0,0,0.1) 70%, transparent 75%),
-                    radial-gradient(ellipse at 20% 200%, transparent 0%, rgba(0,0,0,0.1) 30%, transparent 35%, rgba(0,0,0,0.15) 60%, transparent 65%),
-                    radial-gradient(ellipse at 80% -50%, transparent 0%, rgba(0,0,0,0.1) 20%, transparent 25%, rgba(0,0,0,0.1) 50%, transparent 55%)
+                    radial-gradient(ellipse at 50% -150%, transparent 0%, rgba(0,0,0,0.3) 40%, transparent 45%, rgba(0,0,0,0.2) 70%, transparent 75%),
+                    radial-gradient(ellipse at 10% 250%, transparent 0%, rgba(0,0,0,0.2) 30%, transparent 35%, rgba(0,0,0,0.3) 60%, transparent 65%),
+                    radial-gradient(ellipse at 90% -100%, transparent 0%, rgba(0,0,0,0.2) 20%, transparent 25%, rgba(0,0,0,0.2) 50%, transparent 55%)
                   `,
                   backgroundSize: '200% 200%'
                 }}
               />
 
-              {/* Wavy Horizontal Fibers (Skewed) */}
+              {/* Random Knots */}
               <div 
-                className="absolute inset-0 opacity-30 pointer-events-none mix-blend-multiply overflow-hidden"
-              >
-                <div 
-                  className="absolute inset-[-50%] rotate-[-1deg] skew-x-[2deg]"
-                  style={{
-                    backgroundImage: `repeating-linear-gradient(
-                      to bottom,
-                      transparent,
-                      transparent 2px,
-                      rgba(0,0,0,0.2) 2px,
-                      rgba(0,0,0,0.2) 4px,
-                      transparent 4px,
-                      transparent 8px
-                    )`,
-                    backgroundSize: '100% 8px'
-                  }}
-                />
-              </div>
-
-              {/* Random Knots and Dark Spots */}
-              <div 
-                className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply"
+                className="absolute inset-0 opacity-30 mix-blend-multiply"
                 style={{
                   backgroundImage: `
-                    radial-gradient(ellipse at 30% 40%, rgba(0,0,0,0.4) 0%, transparent 10%),
-                    radial-gradient(ellipse at 70% 60%, rgba(0,0,0,0.3) 0%, transparent 8%),
-                    radial-gradient(ellipse at 15% 85%, rgba(0,0,0,0.4) 0%, transparent 12%)
+                    radial-gradient(ellipse at 25% 35%, rgba(0,0,0,0.6) 0%, transparent 8%),
+                    radial-gradient(ellipse at 75% 65%, rgba(0,0,0,0.5) 0%, transparent 6%),
+                    radial-gradient(ellipse at 15% 80%, rgba(0,0,0,0.6) 0%, transparent 10%),
+                    radial-gradient(ellipse at 85% 15%, rgba(0,0,0,0.4) 0%, transparent 7%)
                   `
                 }}
               />
 
-              {/* Deep Grain Shadows (Non-linear) */}
+              {/* Fine Horizontal Streaks */}
               <div 
-                className="absolute inset-0 opacity-25 pointer-events-none mix-blend-multiply"
+                className="absolute inset-0 opacity-20 mix-blend-screen"
                 style={{
-                  backgroundImage: `repeating-radial-gradient(
-                    circle at 50% -500%,
-                    rgba(0,0,0,0.1) 0px,
-                    rgba(0,0,0,0.1) 1px,
+                  backgroundImage: `repeating-linear-gradient(
+                    to bottom,
+                    rgba(255,255,255,0.2) 0px,
+                    rgba(255,255,255,0.2) 1px,
                     transparent 1px,
-                    transparent 15px
+                    transparent 25px
                   )`
                 }}
               />
 
-              <div className="absolute inset-0 pointer-events-none rounded-sm shadow-[inset_0_0_15px_rgba(0,0,0,0.7),inset_0_0_2px_rgba(0,0,0,0.9)]" />
-              <div className="absolute inset-0 pointer-events-none rounded-sm border border-white/10 mix-blend-screen opacity-20" />
-              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/20 pointer-events-none" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,transparent_70%)] pointer-events-none" />
-            </>
+              {/* Edge Shadows and Depth */}
+              <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.8),inset_0_0_5px_rgba(0,0,0,1)]" />
+              <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/30" />
+            </div>
           )}
           
           {showGrid && (
