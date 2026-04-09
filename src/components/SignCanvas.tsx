@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { EngravingDesign, WoodMaterial, Decoration, TextElement } from '@/types/engraving';
-import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter, RotateCw, FlipHorizontal, FlipVertical, Layers } from 'lucide-react';
+import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter, RotateCw, FlipHorizontal, FlipVertical, Layers, ArrowLeftRight, ArrowUpDown } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 const WOOD_COLORS: Record<WoodMaterial, string> = {
@@ -53,13 +53,10 @@ const SignCanvas = ({
   const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  // Use standard 96 DPI for print mode to ensure real-world scaling
-  // Use 35 PPI for screen display to keep it manageable
   const ppi = isPrintMode ? 96 : 35; 
   let displayWidth = design.width * ppi;
   let displayHeight = design.height * ppi;
 
-  // Only apply screen constraints if NOT in print mode
   if (!isPrintMode) {
     const maxWidth = 1400;
     const maxHeight = 900;
@@ -187,7 +184,7 @@ const SignCanvas = ({
 
   return (
     <div 
-      className={`flex items-center justify-center w-full p-4 sm:p-12 ${isPrintMode ? 'bg-white' : 'bg-black/20 rounded-2xl border border-amber-900/10 min-h-[600px]'}`}
+      className={`flex items-center justify-center w-full p-12 sm:p-20 ${isPrintMode ? 'bg-white' : 'bg-black/20 rounded-2xl border border-amber-900/10 min-h-[600px]'}`}
       onClick={() => onSelect(null)}
     >
       <div 
@@ -200,6 +197,37 @@ const SignCanvas = ({
           height: `${displayHeight}px`,
         }}
       >
+        {/* Dimension Lines (Rulers) */}
+        {!isPrintMode && (
+          <>
+            {/* Top Width Ruler */}
+            <div className="absolute -top-10 left-0 right-0 flex flex-col items-center pointer-events-none">
+              <div className="flex items-center justify-between w-full px-1">
+                <div className="w-px h-3 bg-amber-500/50" />
+                <div className="flex-1 h-px bg-amber-500/30 mx-1" />
+                <div className="px-2 py-0.5 bg-amber-900/80 rounded text-[10px] font-mono text-amber-200 border border-amber-500/30 whitespace-nowrap">
+                  {design.width}"
+                </div>
+                <div className="flex-1 h-px bg-amber-500/30 mx-1" />
+                <div className="w-px h-3 bg-amber-500/50" />
+              </div>
+            </div>
+
+            {/* Left Height Ruler */}
+            <div className="absolute -left-12 top-0 bottom-0 flex items-center pointer-events-none">
+              <div className="flex flex-col items-center justify-between h-full py-1">
+                <div className="h-px w-3 bg-amber-500/50" />
+                <div className="flex-1 w-px bg-amber-500/30 my-1" />
+                <div className="px-1 py-2 bg-amber-900/80 rounded text-[10px] font-mono text-amber-200 border border-amber-500/30 [writing-mode:vertical-lr] rotate-180">
+                  {design.height}"
+                </div>
+                <div className="flex-1 w-px bg-amber-500/30 my-1" />
+                <div className="h-px w-3 bg-amber-500/50" />
+              </div>
+            </div>
+          </>
+        )}
+
         {/* Wood Sign Container */}
         <div className={`absolute inset-0 overflow-hidden rounded-sm ${isPrintMode ? 'border border-gray-200' : 'shadow-2xl border border-black/40'}`}>
           <div 
@@ -260,7 +288,7 @@ const SignCanvas = ({
                   style={{ 
                     ...getEngravingStyle(textEl.fontColor),
                     fontFamily: textEl.fontFamily, 
-                    fontSize: `${textEl.fontSize * (isPrintMode ? 2.74 : 1)}px`, // Scale font size for 96 DPI print
+                    fontSize: `${textEl.fontSize * (isPrintMode ? 2.74 : 1)}px`, 
                     letterSpacing: `${textEl.letterSpacing * (isPrintMode ? 2.74 : 1)}px`,
                   }}
                   className="text-center leading-tight select-none font-bold tracking-tight whitespace-nowrap"
