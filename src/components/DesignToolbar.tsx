@@ -15,6 +15,21 @@ const FONTS = [
   { name: 'Modern Sans', value: "'Inter', sans-serif" },
   { name: 'Vintage Slab', value: "'Arvo', serif" },
   { name: 'Elegant Cursive', value: "'Great Vibes', cursive" },
+  { name: 'Decorative Serif', value: "'Cinzel', serif" },
+  { name: 'Geometric Sans', value: "'Montserrat', sans-serif" },
+  { name: 'Fun Script', value: "'Pacifico', cursive" },
+  { name: 'Typewriter', value: "'Special Elite', cursive" },
+  { name: 'Blackletter', value: "'UnifrakturMaguntia', cursive" },
+  { name: 'Bold Condensed', value: "'Bebas Neue', sans-serif" },
+  { name: 'Bold Script', value: "'Lobster', cursive" },
+  { name: 'Brush Script', value: "'Satisfy', cursive" },
+  { name: 'Western', value: "'Rye', cursive" },
+  { name: 'High Contrast', value: "'Abril Fatface', serif" },
+  { name: 'Modern Condensed', value: "'Oswald', sans-serif" },
+  { name: 'Elegant Serif', value: "'Cormorant Garamond', serif" },
+  { name: 'Handwritten', value: "'Caveat', cursive" },
+  { name: 'Sketchy', value: "'Fredericka the Great', cursive" },
+  { name: 'Gothic', value: "'Pirata One', cursive" },
 ];
 
 const WOOD_TYPES: { name: string; value: WoodMaterial; color: string }[] = [
