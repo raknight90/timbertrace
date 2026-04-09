@@ -42,7 +42,7 @@ const DesignLibrary = ({ designs, onLoad, onDelete }: DesignLibraryProps) => {
                 
                 <div className="flex-1 min-w-0">
                   <h4 className="text-xs font-medium truncate text-amber-100">
-                    {design.name || design.text || "Untitled Design"}
+                    {design.name || design.textElements[0]?.text || "Untitled Design"}
                   </h4>
                   <p className="text-[9px] text-amber-200/40">
                     {design.width}"x{design.height}" • {new Date(design.createdAt).toLocaleDateString()}
