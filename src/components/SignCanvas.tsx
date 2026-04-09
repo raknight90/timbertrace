@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { EngravingDesign, WoodMaterial, Decoration, TextElement } from '@/types/engraving';
-import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter, RotateCw, FlipHorizontal, FlipVertical, Layers } from 'lucide-react';
+import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter, RotateCw, FlipHorizontal, FlipVertical, Layers, Palette } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 const WOOD_COLORS: Record<WoodMaterial, string> = {
@@ -434,7 +434,7 @@ const SignCanvas = ({
                   <span 
                     className="select-none block"
                     style={{
-                      ...getEngravingStyle('rgba(20, 10, 5, 0.9)'), // Fixed natural engraving color
+                      ...getEngravingStyle(dec.color || 'rgba(20, 10, 5, 0.9)'),
                       fontSize: `${48 * dec.scale * (isPrintMode ? 2.74 : 1)}px`,
                     }}
                   >
@@ -485,6 +485,16 @@ const SignCanvas = ({
                       </button>
                     </div>
                     <div className="flex items-center gap-1 px-1 border-r border-amber-900/30">
+                      <div className="relative flex items-center p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors cursor-pointer">
+                        <input 
+                          type="color" 
+                          value={dec.color && dec.color.startsWith('#') ? dec.color : '#1a1a1a'}
+                          onChange={(e) => onUpdateDecoration?.(dec.id, { color: e.target.value })}
+                          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                          title="Decoration Color"
+                        />
+                        <Palette size={14} />
+                      </div>
                       <button 
                         onClick={() => onBringToFront?.(dec.id)}
                         className="p-1.5 hover:bg-amber-900/40 rounded-full text-amber-400 transition-colors"

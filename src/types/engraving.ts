@@ -9,6 +9,7 @@ export interface Decoration {
   rotation: number;
   flipX?: boolean;
   flipY?: boolean;
+  color?: string;
 }
 
 export interface TextElement {
