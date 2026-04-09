@@ -8,7 +8,8 @@ import DecorationPicker from '@/components/DecorationPicker';
 import DesignLibrary from '@/components/DesignLibrary';
 import { showSuccess, showError } from '@/utils/toast';
 import html2canvas from 'html2canvas';
-import { Hammer, Plus, Undo2, Redo2, Grid3X3, Printer, ZoomIn, ZoomOut } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import { Hammer, Plus, Undo2, Redo2, Grid3X3, FileText, ZoomIn, ZoomOut } from 'lucide-react';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,18 +43,16 @@ const Index = () => {
   const [library, setLibrary] = useState<EngravingDesign[]>([]);
   const [showGrid, setShowGrid] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
-  const [isPrintMode, setIsPrintMode] = useState(false);
+  const [isTemplateMode, setIsTemplateMode] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const editorRef = useRef<HTMLDivElement>(null);
   const zoomRef = useRef(zoom);
 
-  // Keep zoomRef in sync for the wheel event listener
   useEffect(() => {
     zoomRef.current = zoom;
   }, [zoom]);
 
-  // Load library from local storage
   useEffect(() => {
     const saved = localStorage.getItem('wood-sign-library');
     if (saved) {
@@ -66,12 +65,10 @@ const Index = () => {
     }
   }, []);
 
-  // Save library to local storage
   useEffect(() => {
     localStorage.setItem('wood-sign-library', JSON.stringify(library));
   }, [library]);
 
-  // Mouse Wheel Zoom Logic (Zoom at Point)
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -86,23 +83,15 @@ const Index = () => {
 
         if (newZoom !== oldZoom) {
           const rect = container.getBoundingClientRect();
-          
-          // Mouse position relative to the container
           const mouseX = e.clientX - rect.left;
           const mouseY = e.clientY - rect.top;
-
-          // Calculate where the mouse is pointing in the "unscaled" coordinate space
-          // We subtract the scroll and divide by zoom
           const contentX = (mouseX + container.scrollLeft) / oldZoom;
           const contentY = (mouseY + container.scrollTop) / oldZoom;
 
           setZoom(newZoom);
-
-          // Calculate new scroll positions to keep the content point under the mouse
           const newScrollLeft = contentX * newZoom - mouseX;
           const newScrollTop = contentY * newZoom - mouseY;
 
-          // Apply scroll adjustment in the next frame after the scale transform updates
           requestAnimationFrame(() => {
             container.scrollLeft = newScrollLeft;
             container.scrollTop = newScrollTop;
@@ -120,7 +109,6 @@ const Index = () => {
     };
   }, []);
 
-  // History Management
   const addToHistory = useCallback((design: EngravingDesign) => {
     setHistory(prev => {
       const newHistory = prev.slice(0, historyIndex + 1);
@@ -145,7 +133,6 @@ const Index = () => {
     }
   };
 
-  // Initialize history
   useEffect(() => {
     if (history.length === 0) {
       setHistory([JSON.parse(JSON.stringify(DEFAULT_DESIGN))]);
@@ -385,43 +372,38 @@ const Index = () => {
     showSuccess("Design removed from library");
   };
 
-  const handleExportPNG = async () => {
+  const handleExportPDF = async () => {
     const element = document.getElementById('sign-preview');
     if (!element) return;
 
     setSelectedId(null);
+    const wasTemplate = isTemplateMode;
+    setIsTemplateMode(true);
 
     setTimeout(async () => {
       try {
         const canvas = await html2canvas(element, {
-          scale: 3,
+          scale: 4, // High resolution for PDF
           useCORS: true,
           backgroundColor: null,
         });
         
-        const link = document.createElement('a');
-        link.download = `${currentDesign.name || 'wood-sign'}${isPrintMode ? '-print' : ''}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        showSuccess("PNG exported successfully!");
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+          orientation: currentDesign.width > currentDesign.height ? 'l' : 'p',
+          unit: 'in',
+          format: [currentDesign.width, currentDesign.height]
+        });
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, currentDesign.width, currentDesign.height);
+        pdf.save(`${currentDesign.name || 'wood-sign'}-template.pdf`);
+        
+        if (!wasTemplate) setIsTemplateMode(false);
+        showSuccess("To-scale PDF exported successfully!");
       } catch (err) {
-        showError("Failed to export PNG");
+        showError("Failed to export PDF");
         console.error(err);
-      }
-    }, 50);
-  };
-
-  const handlePrint = () => {
-    setSelectedId(null);
-    const wasPrintMode = isPrintMode;
-    setIsPrintMode(true);
-    
-    // Small delay to allow React to render the print-ready state
-    setTimeout(() => {
-      window.print();
-      // Restore previous mode after print dialog closes
-      if (!wasPrintMode) {
-        setIsPrintMode(false);
+        if (!wasTemplate) setIsTemplateMode(false);
       }
     }, 100);
   };
@@ -481,13 +463,13 @@ const Index = () => {
                 <Grid3X3 size={16} />
               </Button>
               <Button 
-                variant={isPrintMode ? "secondary" : "ghost"} 
+                variant={isTemplateMode ? "secondary" : "ghost"} 
                 size="icon" 
-                onClick={() => setIsPrintMode(!isPrintMode)}
-                className={`h-8 w-8 ${isPrintMode ? 'bg-amber-500/20 text-amber-400' : 'text-amber-200'}`}
-                title="Print Ready Mode"
+                onClick={() => setIsTemplateMode(!isTemplateMode)}
+                className={`h-8 w-8 ${isTemplateMode ? 'bg-amber-500/20 text-amber-400' : 'text-amber-200'}`}
+                title="Template Mode (High Contrast)"
               >
-                <Printer size={16} />
+                <FileText size={16} />
               </Button>
             </div>
 
@@ -558,8 +540,7 @@ const Index = () => {
               onUpdateText={handleUpdateText}
               onAddText={handleAddText}
               onSave={handleSaveToLibrary}
-              onExportPNG={handleExportPNG}
-              onPrint={handlePrint}
+              onExportPDF={handleExportPDF}
             />
             <DecorationPicker 
               onAdd={handleAddDecoration} 
@@ -581,7 +562,7 @@ const Index = () => {
               <div className="mb-6 flex items-center justify-between w-full max-w-[1000px] mx-auto no-print">
                 <h2 className="text-lg font-medium text-amber-200/80">Live Editor</h2>
                 <div className="text-[10px] text-amber-500/40 uppercase tracking-widest font-bold">
-                  {isPrintMode ? "Print Ready Mode Active" : "Hold Ctrl + Scroll to Zoom at Pointer"}
+                  {isTemplateMode ? "Template Mode Active" : "Hold Ctrl + Scroll to Zoom at Pointer"}
                 </div>
               </div>
               
@@ -595,7 +576,7 @@ const Index = () => {
                     id="sign-preview" 
                     showGrid={showGrid}
                     snapToGrid={snapToGrid}
-                    isPrintMode={isPrintMode}
+                    isPrintMode={isTemplateMode}
                     selectedId={selectedId}
                     onSelect={setSelectedId}
                     onUpdateDesign={handleUpdateDesign}

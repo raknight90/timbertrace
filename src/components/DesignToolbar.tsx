@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Trees, Check, Space, Download, Save, RefreshCw, Plus, Printer } from 'lucide-react';
+import { Type, Maximize2, Trees, Check, Space, FileText, Save, RefreshCw, Plus } from 'lucide-react';
 
 const FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
@@ -45,8 +45,7 @@ interface DesignToolbarProps {
   onUpdateText: (id: string, updates: Partial<TextElement>) => void;
   onAddText: () => void;
   onSave: () => void;
-  onExportPNG: () => void;
-  onPrint: () => void;
+  onExportPDF: () => void;
 }
 
 const DesignToolbar = ({ 
@@ -57,12 +56,10 @@ const DesignToolbar = ({
   onUpdateText, 
   onAddText, 
   onSave, 
-  onExportPNG,
-  onPrint
+  onExportPDF
 }: DesignToolbarProps) => {
   const selectedText = design.textElements.find(t => t.id === selectedId);
   
-  // Local state for dimensions to prevent jumping while typing
   const [localWidth, setLocalWidth] = useState(design.width.toString());
   const [localHeight, setLocalHeight] = useState(design.height.toString());
 
@@ -283,24 +280,14 @@ const DesignToolbar = ({
             </>
           )}
         </Button>
-        <div className="grid grid-cols-2 gap-3">
-          <Button 
-            onClick={onExportPNG}
-            variant="outline"
-            className="border-amber-700 text-[#3d2b1f] bg-amber-200 hover:bg-amber-300 h-11 font-bold"
-          >
-            <Download size={16} className="mr-2" />
-            PNG
-          </Button>
-          <Button 
-            onClick={onPrint}
-            variant="outline"
-            className="border-amber-700 text-[#3d2b1f] bg-amber-200 hover:bg-amber-300 h-11 font-bold"
-          >
-            <Printer size={16} className="mr-2" />
-            Print
-          </Button>
-        </div>
+        <Button 
+          onClick={onExportPDF}
+          variant="outline"
+          className="w-full border-amber-700 text-[#3d2b1f] bg-amber-200 hover:bg-amber-300 h-11 font-bold"
+        >
+          <FileText size={16} className="mr-2" />
+          Export to Scale PDF
+        </Button>
       </div>
     </div>
   );
