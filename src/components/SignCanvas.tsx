@@ -235,54 +235,70 @@ const SignCanvas = ({
           
           {!isPrintMode && (
             <>
-              {/* Base Wood Texture */}
-              <div className="absolute inset-0 opacity-30 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
+              {/* Base Wood Texture Overlay */}
+              <div className="absolute inset-0 opacity-50 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
               
-              {/* Horizontal Grain Fibers */}
+              {/* Defined Horizontal Grain Fibers */}
               <div 
-                className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply"
+                className="absolute inset-0 opacity-40 pointer-events-none mix-blend-multiply"
                 style={{
                   backgroundImage: `repeating-linear-gradient(
                     to bottom,
                     transparent,
                     transparent 1px,
-                    rgba(0,0,0,0.2) 1px,
-                    rgba(0,0,0,0.2) 2px
+                    rgba(0,0,0,0.3) 1px,
+                    rgba(0,0,0,0.3) 2px,
+                    transparent 2px,
+                    transparent 4px
                   )`,
-                  backgroundSize: '100% 3px'
+                  backgroundSize: '100% 4px'
                 }}
               />
 
-              {/* Organic Horizontal Growth Rings */}
+              {/* Strong Organic Horizontal Growth Rings */}
               <div 
-                className="absolute inset-0 opacity-40 pointer-events-none mix-blend-overlay"
+                className="absolute inset-0 opacity-60 pointer-events-none mix-blend-overlay"
                 style={{
                   backgroundImage: `linear-gradient(
                     to bottom,
                     transparent 0%,
-                    rgba(0,0,0,0.1) 10%,
-                    transparent 20%,
-                    rgba(0,0,0,0.05) 35%,
-                    transparent 50%,
-                    rgba(0,0,0,0.15) 65%,
-                    transparent 80%,
-                    rgba(0,0,0,0.05) 90%,
+                    rgba(0,0,0,0.2) 5%,
+                    transparent 15%,
+                    rgba(0,0,0,0.1) 30%,
+                    transparent 45%,
+                    rgba(0,0,0,0.3) 60%,
+                    transparent 75%,
+                    rgba(0,0,0,0.1) 85%,
                     transparent 100%
                   )`,
-                  backgroundSize: '100% 200px'
+                  backgroundSize: '100% 150px'
                 }}
               />
 
-              {/* Subtle Horizontal Streaks */}
+              {/* Pronounced Horizontal Streaks */}
               <div 
-                className="absolute inset-0 opacity-10 pointer-events-none mix-blend-screen"
+                className="absolute inset-0 opacity-20 pointer-events-none mix-blend-screen"
                 style={{
                   backgroundImage: `repeating-linear-gradient(
                     to bottom,
-                    rgba(255,255,255,0.1) 0px,
-                    rgba(255,255,255,0.1) 1px,
+                    rgba(255,255,255,0.15) 0px,
+                    rgba(255,255,255,0.15) 2px,
+                    transparent 2px,
+                    transparent 30px
+                  )`
+                }}
+              />
+
+              {/* Deep Grain Shadows */}
+              <div 
+                className="absolute inset-0 opacity-30 pointer-events-none mix-blend-multiply"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(
+                    to bottom,
+                    rgba(0,0,0,0.1) 0px,
+                    rgba(0,0,0,0.1) 1px,
                     transparent 1px,
-                    transparent 40px
+                    transparent 10px
                   )`
                 }}
               />
