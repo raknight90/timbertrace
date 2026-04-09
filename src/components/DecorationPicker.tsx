@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Palette, Upload, Image as ImageIcon } from 'lucide-react';
+import { Palette, Upload } from 'lucide-react';
 
 // Appending \uFE0E forces the browser to render the character as text rather than a colorful emoji
 const DECORATIONS = [
@@ -81,10 +81,9 @@ const DECORATIONS = [
 interface DecorationPickerProps {
   onAdd: (content: string) => void;
   onAddImage: (src: string) => void;
-  selectedColor?: string;
 }
 
-const DecorationPicker = ({ onAdd, onAddImage, selectedColor }: DecorationPickerProps) => {
+const DecorationPicker = ({ onAdd, onAddImage }: DecorationPickerProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,10 +133,7 @@ const DecorationPicker = ({ onAdd, onAddImage, selectedColor }: DecorationPicker
               className="h-12 w-12 flex items-center justify-center bg-black/20 border border-amber-900/30 rounded-lg hover:bg-amber-900/40 hover:border-amber-500 transition-all text-2xl"
               title={dec.name}
             >
-              <span 
-                className="select-none"
-                style={{ color: selectedColor || 'inherit' }}
-              >
+              <span className="select-none">
                 {dec.content}
               </span>
             </button>

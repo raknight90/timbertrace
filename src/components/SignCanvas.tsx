@@ -434,7 +434,7 @@ const SignCanvas = ({
                   <span 
                     className="select-none block"
                     style={{
-                      ...getEngravingStyle(design.textElements[0]?.fontColor || '#1a1a1a'),
+                      ...getEngravingStyle('rgba(20, 10, 5, 0.9)'), // Fixed natural engraving color
                       fontSize: `${48 * dec.scale * (isPrintMode ? 2.74 : 1)}px`,
                     }}
                   >

@@ -545,7 +545,6 @@ const Index = () => {
             <DecorationPicker 
               onAdd={handleAddDecoration} 
               onAddImage={handleAddImageDecoration}
-              selectedColor={currentDesign.textElements[0]?.fontColor}
             />
             <DesignLibrary 
               designs={library} 
