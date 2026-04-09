@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { EngravingDesign, WoodMaterial, TextElement } from '@/types/engraving';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Type, Maximize2, Trees, Space, FileText, Save, RefreshCw, Plus } from 'lucide-react';
+import { Type, Maximize2, Trees, Space, FileText, Save, RefreshCw, Plus, Upload } from 'lucide-react';
+import { showSuccess, showError } from '@/utils/toast';
 
-const FONTS = [
+const INITIAL_FONTS = [
   { name: 'Classic Serif', value: "'Playfair Display', serif" },
   { name: 'Rustic Script', value: "'Dancing Script', cursive" },
   { name: 'Modern Sans', value: "'Inter', sans-serif" },
@@ -74,9 +75,10 @@ const DesignToolbar = ({
   onExportPDF
 }: DesignToolbarProps) => {
   const selectedText = design.textElements.find(t => t.id === selectedId);
-  
+  const [fonts, setFonts] = useState(INITIAL_FONTS);
   const [localWidth, setLocalWidth] = useState(design.width.toString());
   const [localHeight, setLocalHeight] = useState(design.height.toString());
+  const fontInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLocalWidth(design.width.toString());
@@ -97,6 +99,40 @@ const DesignToolbar = ({
     if (!isNaN(num) && num > 0) {
       onUpdate({ height: num });
     }
+  };
+
+  const handleFontUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const fontData = event.target?.result as string;
+      const fontName = file.name.split('.')[0].replace(/[^a-zA-Z0-9]/g, '');
+      const fontFamily = `CustomFont_${fontName}`;
+
+      // Inject @font-face into document
+      const style = document.createElement('style');
+      style.innerHTML = `
+        @font-face {
+          font-family: '${fontFamily}';
+          src: url('${fontData}');
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Add to font list
+      const newFont = { name: `Installed: ${file.name.split('.')[0]}`, value: `'${fontFamily}', sans-serif` };
+      setFonts(prev => [newFont, ...prev]);
+      
+      if (selectedId) {
+        onUpdateText(selectedId, { fontFamily: newFont.value });
+      }
+      
+      showSuccess(`Font "${file.name}" installed successfully!`);
+    };
+    reader.onerror = () => showError("Failed to read font file");
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -192,7 +228,22 @@ const DesignToolbar = ({
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-xs text-amber-200/60">Font Style</Label>
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-amber-200/60">Font Style</Label>
+                  <button 
+                    onClick={() => fontInputRef.current?.click()}
+                    className="text-[10px] text-amber-400 hover:underline flex items-center gap-1"
+                  >
+                    <Upload size={10} /> Install Font
+                  </button>
+                  <input 
+                    type="file" 
+                    ref={fontInputRef} 
+                    className="hidden" 
+                    accept=".ttf,.otf,.woff,.woff2" 
+                    onChange={handleFontUpload}
+                  />
+                </div>
                 <Select 
                   value={selectedText.fontFamily} 
                   onValueChange={(val) => onUpdateText(selectedText.id, { fontFamily: val })}
@@ -201,7 +252,7 @@ const DesignToolbar = ({
                     <SelectValue placeholder="Select Font" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#2a1a0a] border-amber-900/50 text-amber-50">
-                    {FONTS.map(font => (
+                    {fonts.map(font => (
                       <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
                         {font.name}
                       </SelectItem>
