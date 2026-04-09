@@ -189,7 +189,7 @@ const SignCanvas = ({
     >
       <div 
         ref={canvasRef}
-        id={id}
+        id={id} // This ID is used for the PDF export
         onMouseMove={handleMouseMove}
         className="relative transition-all duration-300 ease-out group cursor-default"
         style={{
@@ -197,7 +197,7 @@ const SignCanvas = ({
           height: `${displayHeight}px`,
         }}
       >
-        {/* Dimension Lines (Rulers) */}
+        {/* Dimension Lines (Rulers) - Hidden in Print Mode */}
         {!isPrintMode && (
           <>
             {/* Top Width Ruler */}
