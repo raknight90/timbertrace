@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { EngravingDesign, WoodMaterial, Decoration, TextElement } from '@/types/engraving';
-import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter, RotateCw, FlipHorizontal, FlipVertical, Layers, ArrowLeftRight, ArrowUpDown } from 'lucide-react';
+import { Trash2, Maximize, Copy, AlignCenter, AlignVerticalJustifyCenter, RotateCw, FlipHorizontal, FlipVertical, Layers } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 const WOOD_COLORS: Record<WoodMaterial, string> = {
@@ -189,7 +189,7 @@ const SignCanvas = ({
     >
       <div 
         ref={canvasRef}
-        id={id} // This ID is used for the PDF export
+        id={id}
         onMouseMove={handleMouseMove}
         className="relative transition-all duration-300 ease-out group cursor-default"
         style={{
@@ -197,10 +197,9 @@ const SignCanvas = ({
           height: `${displayHeight}px`,
         }}
       >
-        {/* Dimension Lines (Rulers) - Hidden in Print Mode */}
+        {/* Dimension Lines (Rulers) */}
         {!isPrintMode && (
           <>
-            {/* Top Width Ruler */}
             <div className="absolute -top-10 left-0 right-0 flex flex-col items-center pointer-events-none">
               <div className="flex items-center justify-between w-full px-1">
                 <div className="w-px h-3 bg-amber-500/50" />
@@ -213,7 +212,6 @@ const SignCanvas = ({
               </div>
             </div>
 
-            {/* Left Height Ruler */}
             <div className="absolute -left-12 top-0 bottom-0 flex items-center pointer-events-none">
               <div className="flex flex-col items-center justify-between h-full py-1">
                 <div className="h-px w-3 bg-amber-500/50" />
@@ -237,7 +235,58 @@ const SignCanvas = ({
           
           {!isPrintMode && (
             <>
-              <div className="absolute inset-0 opacity-40 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
+              {/* Base Wood Texture */}
+              <div className="absolute inset-0 opacity-30 pointer-events-none bg-[url('https://www.transparenttextures.com/wood-pattern.png')] mix-blend-overlay" />
+              
+              {/* Horizontal Grain Fibers */}
+              <div 
+                className="absolute inset-0 opacity-20 pointer-events-none mix-blend-multiply"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(
+                    to bottom,
+                    transparent,
+                    transparent 1px,
+                    rgba(0,0,0,0.2) 1px,
+                    rgba(0,0,0,0.2) 2px
+                  )`,
+                  backgroundSize: '100% 3px'
+                }}
+              />
+
+              {/* Organic Horizontal Growth Rings */}
+              <div 
+                className="absolute inset-0 opacity-40 pointer-events-none mix-blend-overlay"
+                style={{
+                  backgroundImage: `linear-gradient(
+                    to bottom,
+                    transparent 0%,
+                    rgba(0,0,0,0.1) 10%,
+                    transparent 20%,
+                    rgba(0,0,0,0.05) 35%,
+                    transparent 50%,
+                    rgba(0,0,0,0.15) 65%,
+                    transparent 80%,
+                    rgba(0,0,0,0.05) 90%,
+                    transparent 100%
+                  )`,
+                  backgroundSize: '100% 200px'
+                }}
+              />
+
+              {/* Subtle Horizontal Streaks */}
+              <div 
+                className="absolute inset-0 opacity-10 pointer-events-none mix-blend-screen"
+                style={{
+                  backgroundImage: `repeating-linear-gradient(
+                    to bottom,
+                    rgba(255,255,255,0.1) 0px,
+                    rgba(255,255,255,0.1) 1px,
+                    transparent 1px,
+                    transparent 40px
+                  )`
+                }}
+              />
+
               <div className="absolute inset-0 pointer-events-none rounded-sm shadow-[inset_0_0_15px_rgba(0,0,0,0.7),inset_0_0_2px_rgba(0,0,0,0.9)]" />
               <div className="absolute inset-0 pointer-events-none rounded-sm border border-white/10 mix-blend-screen opacity-20" />
               <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-black/20 pointer-events-none" />
